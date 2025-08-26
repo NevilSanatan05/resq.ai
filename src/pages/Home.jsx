@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function Home() {
+  const [openChat, setOpenChat] = useState(false);
+
   return (
-    <div className="space-y-16">
+    <div className="space-y-16 relative">
       {/* Hero Section */}
       <section className="text-center py-16 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-xl shadow-lg">
         <h1 className="text-5xl font-extrabold text-teal-400">ResQ.AI</h1>
@@ -95,6 +98,36 @@ function Home() {
           🚨 Get Started
         </Link>
       </section>
+
+{/* Floating Chatbot Button */}
+<button
+  onClick={() => setOpenChat(!openChat)}
+  className="fixed bottom-6 right-6 z-50 bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-full shadow-2xl"
+>
+  💬
+</button>
+
+{/* Chatbot Popup */}
+{openChat && (
+  <div className="fixed bottom-20 right-6 w-80 bg-gray-900 text-white rounded-xl shadow-2xl flex flex-col z-50">
+    <div className="bg-teal-600 p-3 rounded-t-xl font-semibold flex justify-between items-center">
+      <span>🤖 ResQ.AI Chatbot</span>
+      <button onClick={() => setOpenChat(false)} className="text-white">✖</button>
+    </div>
+    <div className="p-4 h-60 overflow-y-auto text-gray-200 text-sm">
+      <p>👋 Hi! I’m ResQ.AI Assistant. Ask me anything.</p>
+    </div>
+    <div className="p-3 border-t border-gray-700 flex">
+      <input
+        type="text"
+        placeholder="Type your message..."
+        className="flex-grow p-2 bg-gray-800 text-white rounded-l"
+      />
+      <button className="bg-teal-600 px-4 rounded-r">➡️</button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
