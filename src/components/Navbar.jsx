@@ -17,11 +17,19 @@ function Navbar() {
           </div>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex space-x-6">
+          <div className="hidden md:flex space-x-6 items-center">
             <Link to="/" className="hover:text-teal-400">Home</Link>
             <Link to="/citizen" className="hover:text-teal-400">Citizen</Link>
             <Link to="/rescue" className="hover:text-teal-400">Rescue</Link>
             <Link to="/admin" className="hover:text-teal-400">Admin</Link>
+            
+            {/* 👇 Login Button */}
+            <Link
+              to="/login"
+              className="ml-4 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold"
+            >
+              Login
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -66,6 +74,14 @@ function Navbar() {
             className="block px-3 py-2 rounded hover:bg-gray-700 hover:text-teal-400"
           >
             Admin
+          </Link>
+          {/* 👇 Mobile Login Button */}
+          <Link
+            to="/login"
+            onClick={() => setIsOpen(false)}
+            className="block px-3 py-2 rounded bg-teal-600 text-white hover:bg-teal-700"
+          >
+            Login
           </Link>
         </div>
       )}
