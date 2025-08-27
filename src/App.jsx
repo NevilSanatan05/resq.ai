@@ -8,8 +8,10 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import SOSButton from "./components/SOSButton";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Register from "./pages/Signup"; // Import the Register componen
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import Dashboard from "./pages/Dashboard";
 
 import { AuthProvider } from "./context/AuthContext";
 import { SOSProvider } from "./context/SOSContext";
@@ -36,8 +38,16 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
+
+                //dashboard
+                <Route path="/dashboard" element={
+                  <ProtectedRoute >
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                
               </Routes>
             </div>
             <SOSButton />
