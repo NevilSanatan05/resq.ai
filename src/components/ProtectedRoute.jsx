@@ -1,15 +1,15 @@
-import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { user } = useContext(AuthContext);
+  const { currentUser } = useAuth(); // custom hook use kar
 
-  if (!user) {
+  if (!currentUser) {
     return <Navigate to="/login" />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
+  // Agar role check karna hai to custom claim ya db me role store karna padega
+  if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
     return <Navigate to="/" />;
   }
 
