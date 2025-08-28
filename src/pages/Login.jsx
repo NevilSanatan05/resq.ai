@@ -13,9 +13,15 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password);
-      alert("Logged in!");
-      navigate("/dashboard"); // ✅ after login redirect
+      // Check if admin credentials
+      if (email === "admin@123" && password === "teamnexus05@") {
+        alert("Admin logged in!");
+        navigate("/admin-dashboard"); // Redirect to admin dashboard
+      } else {
+        await login(email, password);
+        alert("Logged in!");
+        navigate("/dashboard"); // ✅ after login redirect
+      }
     } catch (err) {
       alert(err.message);
     } finally {
@@ -28,7 +34,7 @@ const Login = () => {
     try {
       await loginWithGoogle();
       alert("Google Login Success!");
-      navigate("/dashbaord"); // ✅ redirect after google login
+      navigate("/dashboard"); // ✅ redirect after google login
     } catch (err) {
       alert(err.message);
     } finally {
