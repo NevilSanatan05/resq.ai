@@ -6,7 +6,8 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile
 } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase";
 
@@ -20,8 +21,13 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const register = (fullname,email, password) => {
-    return createUserWithEmailAndPassword(auth, fullname , email, password);
+  const register = async (email, password, fullName) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Update the user profile to include the display name
+    await updateProfile(userCredential.user, {
+      displayName: fullName
+    });
+    return userCredential;
   };
 
   const login = (email, password) => {
