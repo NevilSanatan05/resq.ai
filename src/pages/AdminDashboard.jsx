@@ -1,14 +1,88 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import {
-  FiUsers, FiAlertTriangle, FiMapPin, FiClock, 
-  FiSettings, FiBell, FiSearch, FiMenu, FiChevronDown, FiCalendar
-} from 'react-icons/fi';
+import { FiFilter, FiCalendar,FiChevronDown, FiAlertTriangle, FiUsers , FiClock,FiChevronUp } from 'react-icons/fi';
+
+// Region and state data
+const regions = [
+  {
+    name: 'Northern',
+    states: [
+      'Jammu & Kashmir',
+      'Himachal Pradesh',
+      'Punjab',
+      'Uttarakhand',
+      'Haryana',
+      'Delhi',
+      'Uttar Pradesh',
+      'Ladakh'
+    ]
+  },
+  {
+    name: 'Western',
+    states: [
+      'Rajasthan',
+      'Gujarat',
+      'Goa',
+      'Maharashtra'
+    ]
+  },
+  {
+    name: 'Southern',
+    states: [
+      'Karnataka',
+      'Kerala',
+      'Tamil Nadu',
+      'Andhra Pradesh',
+      'Telangana'
+    ]
+  },
+  {
+    name: 'Eastern',
+    states: [
+      'Bihar',
+      'Jharkhand',
+      'Odisha',
+      'West Bengal'
+    ]
+  },
+  {
+    name: 'Northeastern',
+    states: [
+      'Assam',
+      'Sikkim',
+      'Arunachal Pradesh',
+      'Nagaland',
+      'Manipur',
+      'Mizoram',
+      'Tripura',
+      'Meghalaya'
+    ]
+  },
+  {
+    name: 'Central',
+    states: [
+      'Madhya Pradesh',
+      'Chhattisgarh'
+    ]
+  }
+];
+
+// District data for key states (simplified for demonstration)
+const stateDistricts = {
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Kolhapur', 'Ratnagiri'],
+  'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Kutch', 'Bhavnagar'],
+  'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Palakkad', 'Idukki'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Vellore'],
+  'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Varanasi', 'Allahabad', 'Agra', 'Gorakhpur'],
+  'Bihar': ['Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Darjeeling'],
+  'Assam': ['Guwahati', 'Dibrugarh', 'Silchar', 'Jorhat', 'Tezpur', 'Dhubri']
+};
 
 // Sample data for disaster management dashboard
 const sosData = [
@@ -56,8 +130,33 @@ const teamStatus = [
 ];
 
 const AdminDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentDate] = useState(new Date());
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+  const [showStateDropdown, setShowStateDropdown] = useState(false);
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const [availableStates, setAvailableStates] = useState([]);
+  const [availableDistricts, setAvailableDistricts] = useState([]);
+
+  // Update available states when region changes
+  useEffect(() => {
+    if (selectedRegion) {
+      const region = regions.find(r => r.name === selectedRegion);
+      setAvailableStates(region ? region.states : []);
+      setSelectedState('');
+      setSelectedDistrict('');
+    }
+  }, [selectedRegion]);
+
+  // Update available districts when state changes
+  useEffect(() => {
+    if (selectedState) {
+      setAvailableDistricts(stateDistricts[selectedState] || []);
+      setSelectedDistrict('');
+    }
+  }, [selectedState]);
 
   const getSeverityColor = (severity) => {
     switch(severity.toLowerCase()) {
@@ -79,62 +178,162 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className={`bg-gray-900 text-white w-64 flex-shrink-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out fixed h-full z-10`}>
-        <div className="p-6">
-          <h1 className="text-2xl font-bold">ResQ.AI</h1>
-          <p className="text-gray-400 text-sm">Disaster Response System</p>
-        </div>
-        <nav className="mt-8">
-          <NavItem icon={<FiAlertTriangle />} text="Dashboard" active />
-          <NavItem icon={<FiMapPin />} text="Live Alerts" />
-          <NavItem icon={<FiUsers />} text="Rescue Teams" />
-          <NavItem icon={<FiClock />} text="Response Times" />
-          <NavItem icon={<FiSettings />} text="Settings" />
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col overflow-hidden ml-0 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'} transition-all duration-300`}>
-        {/* Top Navigation */}
-        <header className="bg-white shadow-sm z-10">
-          <div className="flex items-center justify-between p-4">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-gray-700 hover:text-gray-900 focus:outline-none"
-            >
-              <FiMenu size={24} />
-            </button>
-            
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Top Bar */}
+      <header className="bg-gray-800 shadow-lg">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              ResQ.AI Admin Dashboard
+            </h1>
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search alerts, teams, locations..."
-                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <button className="p-2 text-gray-600 hover:text-gray-900 relative">
-                <FiBell size={20} />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-              </button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                  AD
+                <div className="text-sm text-gray-400">
+                  {format(currentDate, 'EEEE, MMMM d, yyyy')}
                 </div>
-                <span className="text-gray-700">Admin</span>
-                <FiChevronDown className="text-gray-500" />
+              </div>
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                AD
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
+
+      {/* Filter Section */}
+      <div className="bg-gray-800 p-4 border-b border-gray-700">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Region Filter */}
+            <div className="relative w-full md:w-64">
+              <button
+                onClick={() => setShowRegionDropdown(!showRegionDropdown)}
+                className="w-full flex items-center justify-between px-4 py-2 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors"
+              >
+                <span>{selectedRegion || 'Select Region'}</span>
+                {showRegionDropdown ? <FiChevronUp /> : <FiChevronDown />}
+              </button>
+              <AnimatePresence>
+                {showRegionDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-10 mt-1 w-full bg-gray-700 rounded-lg shadow-lg overflow-hidden"
+                  >
+                    {regions.map((region) => (
+                      <div
+                        key={region.name}
+                        className="px-4 py-2 hover:bg-gray-600 cursor-pointer"
+                        onClick={() => {
+                          setSelectedRegion(region.name);
+                          setShowRegionDropdown(false);
+                        }}
+                      >
+                        {region.name}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* State Filter */}
+            <div className="relative w-full md:w-64">
+              <button
+                onClick={() => selectedRegion && setShowStateDropdown(!showStateDropdown)}
+                disabled={!selectedRegion}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors ${
+                  selectedRegion ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                <span>{selectedState || 'Select State'}</span>
+                {showStateDropdown ? <FiChevronUp /> : <FiChevronDown />}
+              </button>
+              <AnimatePresence>
+                {showStateDropdown && availableStates.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-10 mt-1 w-full bg-gray-700 rounded-lg shadow-lg overflow-y-auto max-h-60"
+                  >
+                    {availableStates.map((state) => (
+                      <div
+                        key={state}
+                        className="px-4 py-2 hover:bg-gray-600 cursor-pointer"
+                        onClick={() => {
+                          setSelectedState(state);
+                          setShowStateDropdown(false);
+                        }}
+                      >
+                        {state}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* District Filter */}
+            <div className="relative w-full md:w-64">
+              <button
+                onClick={() => selectedState && setShowDistrictDropdown(!showDistrictDropdown)}
+                disabled={!selectedState}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors ${
+                  selectedState ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                <span>{selectedDistrict || 'Select District'}</span>
+                {showDistrictDropdown ? <FiChevronUp /> : <FiChevronDown />}
+              </button>
+              <AnimatePresence>
+                {showDistrictDropdown && availableDistricts.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-10 mt-1 w-full bg-gray-700 rounded-lg shadow-lg overflow-y-auto max-h-60"
+                  >
+                    {availableDistricts.map((district) => (
+                      <div
+                        key={district}
+                        className="px-4 py-2 hover:bg-gray-600 cursor-pointer"
+                        onClick={() => {
+                          setSelectedDistrict(district);
+                          setShowDistrictDropdown(false);
+                        }}
+                      >
+                        {district}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(selectedRegion || selectedState || selectedDistrict) && (
+              <button
+                onClick={() => {
+                  setSelectedRegion('');
+                  setSelectedState('');
+                  setSelectedDistrict('');
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
 
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Disaster Response Dashboard</h2>
             <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border">
@@ -311,44 +510,45 @@ const AdminDashboard = () => {
               </div>
             </ChartCard>
           </div>
-        </main>
-      </div>
-    </div>
+          </div>
+         </main>
+         </div>
+      
   );
 };
 
 // Reusable Components
-const NavItem = ({ icon, text, active = false }) => (
-  <a
-    href="#"
-    className={`flex items-center px-6 py-3 text-sm font-medium ${active ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-  >
-    <span className="mr-3">{icon}</span>
-    {text}
-  </a>
-);
 
 const StatCard = ({ title, value, change, isPositive, icon, color = 'blue' }) => {
   const colorVariants = {
-    red: 'bg-red-50',
-    blue: 'bg-blue-50',
-    green: 'bg-green-50',
-    purple: 'bg-purple-50',
+    red: 'bg-red-500/10 border-red-500/30',
+    blue: 'bg-blue-500/10 border-blue-500/30',
+    green: 'bg-green-500/10 border-green-500/30',
+    purple: 'bg-purple-500/10 border-purple-500/30',
+  };
+
+  const iconColors = {
+    red: 'text-red-400',
+    blue: 'text-blue-400',
+    green: 'text-green-400',
+    purple: 'text-purple-400',
   };
 
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className={`${colorVariants[color] || 'bg-blue-50'} p-6 rounded-xl shadow-sm`}
+      className={`${colorVariants[color] || 'bg-blue-500/10'} p-6 rounded-xl border backdrop-blur-sm`}
     >
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold mt-1 text-gray-900">{value}</p>
-          <div className={`flex items-center mt-2 ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+          <p className="text-sm font-medium text-gray-400">{title}</p>
+          <p className="text-2xl font-bold mt-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">{value}</p>
+          <div className={`inline-flex items-center mt-2 px-2 py-1 rounded-full text-xs font-medium ${
+            isPositive ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+          }`}>
             <span className="text-sm font-medium">{change}</span>
             <svg
-              className={`w-4 h-4 ml-1 ${!isPositive && 'transform rotate-180'}`}
+              className={`w-3 h-3 ml-1 ${!isPositive && 'transform rotate-180'}`}
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -360,8 +560,8 @@ const StatCard = ({ title, value, change, isPositive, icon, color = 'blue' }) =>
             </svg>
           </div>
         </div>
-        <div className="p-3 rounded-lg bg-opacity-20 bg-white">
-          {icon}
+        <div className={`p-2 rounded-lg bg-opacity-20 ${iconColors[color] || 'bg-blue-500/20'}`}>
+          {React.cloneElement(icon, { className: `${icon.props.className} ${iconColors[color] || 'text-blue-400'}` })}
         </div>
       </div>
     </motion.div>
@@ -369,8 +569,8 @@ const StatCard = ({ title, value, change, isPositive, icon, color = 'blue' }) =>
 };
 
 const ChartCard = ({ title, children, className = '' }) => (
-  <div className={`bg-white p-6 rounded-xl shadow-sm border border-gray-100 ${className}`}>
-    <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+  <div className={`bg-gray-800/50 p-6 rounded-xl border border-gray-700/50 backdrop-blur-sm ${className}`}>
+    <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
     {children}
   </div>
 );
