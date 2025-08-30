@@ -20,22 +20,23 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // First try to authenticate with Firebase
+      await login(email, password);
+      
       // Check if admin credentials
-      if (email === "admin@123gmail.com" && password === "teamnexus05@") {
-        alert("Admin logged in!");
-        navigate("/admin-dashboard"); // Redirect to admin dashboard
+      if (email === "admin@123gmail.com") {
+        alert("Admin logged in successfully!");
+        navigate("/admin-dashboard");
       } 
       // Check if rescue team member
       else if (allowedRescueEmails.includes(email.toLowerCase())) {
-        await login(email, password);
         alert("Rescue team member logged in!");
-        navigate("/rescue"); // Redirect to rescue dashboard
+        navigate("/rescue");
       }
       // Regular user
       else {
-        await login(email, password);
-        alert("Logged in!");
-        navigate("/dashboard"); // Regular user dashboard
+        alert("Logged in successfully!");
+        navigate("/dashboard");
       }
     } catch (err) {
       alert(err.message);

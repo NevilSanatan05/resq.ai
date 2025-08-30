@@ -28,6 +28,11 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   // Check if user has required role
   if (allowedRoles) {
+    // Special case for admin - check by email
+    if (currentUser.email === 'admin@123gmail.com' && window.location.pathname.includes('admin-dashboard')) {
+      return children;
+    }
+    
     // Special case for rescue team - check by email
     const isRescueTeam = RESCUE_TEAM_EMAILS.includes(currentUser.email?.toLowerCase());
     
@@ -35,8 +40,8 @@ function ProtectedRoute({ children, allowedRoles }) {
       return children;
     }
     
-    // Regular role check
-    if (allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
+    // If user doesn't have required role, redirect to unauthorized
+    if (allowedRoles.length > 0) {
       return <Navigate to="/unauthorized" replace />;
     }
   }

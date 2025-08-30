@@ -39,12 +39,7 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
-                {/* Admin Routes */}
-                <Route path="/admin" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Admin />
-                  </ProtectedRoute>
-                } />
+               
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
