@@ -15,7 +15,7 @@ import { format, addHours, parseISO } from 'date-fns';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Spinner, useToast } from '@chakra-ui/react';
+
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -73,7 +73,6 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const RescueDashboard = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const toast = useToast();
 
   // State management
   const [state, setState] = useState({
@@ -98,6 +97,15 @@ const RescueDashboard = () => {
     { id: 3, name: 'Rahul Kumar', role: 'Rescuer', status: 'online', avatar: 'R' },
     { id: 4, name: 'Ananya Reddy', role: 'Coordinator', status: 'offline', avatar: 'A' },
   ], []);
+
+  // Initialize team status with mock data
+  useEffect(() => {
+    setState(prev => ({
+      ...prev,
+      teamStatus: mockTeamMembers,
+      loading: false
+    }));
+  }, [mockTeamMembers]);
 
   // Update state helper
   const updateState = useCallback((updates) => {
@@ -135,13 +143,7 @@ const RescueDashboard = () => {
         console.error('Error fetching user profile:', error);
         if (isMounted) {
           updateState({ loading: false });
-          toast({
-            title: 'Error',
-            description: 'Failed to load user profile',
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          });
+          alert('Error: Failed to load user profile');
         }
       }
     };
@@ -151,7 +153,7 @@ const RescueDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentUser, updateState, toast]);
+  }, [currentUser, updateState]);
 
   // Handle logout
   const handleLogout = useCallback(async () => {
@@ -160,15 +162,9 @@ const RescueDashboard = () => {
       navigate('/login');
     } catch (error) {
       console.error('Failed to log out:', error);
-      toast({
-        title: 'Logout Failed',
-        description: error.message || 'Failed to log out',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      alert(`Logout Failed: ${error.message || 'Failed to log out'}`);
     }
-  }, [logout, navigate, toast]);
+  }, [logout, navigate]);
 
   // Handle tab change
   const handleTabChange = useCallback((tab) => {
@@ -192,23 +188,10 @@ const RescueDashboard = () => {
       activeAlerts: prev.activeAlerts.filter(alert => alert.id !== alertId)
     }));
 
-    toast({
-      title: 'Alert Accepted',
-      description: 'You have accepted the alert and are now assigned to it.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    });
-  }, [updateState, toast]);
+    alert('Alert Accepted: You have accepted the alert and are now assigned to it.');
+  }, [updateState]);
 
-  // Show loading state
-  if (state.loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="xl" />
-      </div>
-    );
-  }
+  
 
   // Destructure state for easier access
   const {
@@ -262,13 +245,7 @@ const RescueDashboard = () => {
             },
             (error) => {
               console.error('Error getting location:', error);
-              toast({
-                title: 'Location Error',
-                description: 'Could not get your location. Some features may be limited.',
-                status: 'warning',
-                duration: 5000,
-                isClosable: true,
-              });
+              alert('Location Error: Could not get your location. Some features may be limited.');
             }
           );
         }
@@ -312,13 +289,7 @@ const RescueDashboard = () => {
         console.error('Error initializing dashboard:', error);
         if (isMounted) {
           updateState({ loading: false });
-          toast({
-            title: 'Initialization Error',
-            description: 'Failed to load dashboard data. Please try refreshing the page.',
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          });
+          alert('Initialization Error: Failed to load dashboard data. Please try refreshing the page.');
         }
       }
     };
@@ -328,7 +299,7 @@ const RescueDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [updateState, toast]);
+  }, [updateState]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -856,7 +827,7 @@ const RescueDashboard = () => {
             <h2 className="text-lg font-medium text-gray-900">Team Status</h2>
           </div>
     <div className="divide-y divide-gray-200">
-      {teamStatus.map((member) => (
+      {state.teamStatus.map((member) => (
         <div key={member.id} className="p-4 hover:bg-gray-50 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
