@@ -18,25 +18,30 @@ import { AuthProvider } from "./context/AuthContext";
 import { SOSProvider } from "./context/SOSContext";
 import RescueDashboard from "./pages/RescueDashboard";
 
+
 function App() {
   return (
     <div className="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
       <Router>
-        <AuthProvider>
-          <SOSProvider>
+       
+          <AuthProvider>
+            <SOSProvider>
             <Navbar />
             <div className="flex-grow p-6">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/citizen" element={<Citizen />} />
-                {/* Rescue Dashboard Route */}
+                
+                {/* Rescue Dashboard Route - Only accessible by rescue team */}
                 <Route path="/rescue" element={
-                  <ProtectedRoute >
+                  <ProtectedRoute allowedRoles={['rescue']}>
                     <RescueDashboard />
                   </ProtectedRoute>
                 } />
+                
+                {/* Admin Routes */}
                 <Route path="/admin" element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Admin />
                   </ProtectedRoute>
                 } />
@@ -63,8 +68,9 @@ function App() {
             </div>
             <SOSButton />
             <Footer />
-          </SOSProvider>
-        </AuthProvider>
+            </SOSProvider>
+          </AuthProvider>
+       
       </Router>
     </div>
   );
