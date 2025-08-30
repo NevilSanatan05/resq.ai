@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 
 import { AuthProvider } from "./context/AuthContext";
 import { SOSProvider } from "./context/SOSContext";
+import RescueDashboard from "./pages/RescueDashboard";
 
 function App() {
   return (
@@ -28,9 +29,10 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/citizen" element={<Citizen />} />
+                {/* Rescue Dashboard Route */}
                 <Route path="/rescue" element={
-                  <ProtectedRoute allowedRoles={["rescue"]}>
-                    <Rescue />
+                  <ProtectedRoute >
+                    <RescueDashboard />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin" element={
@@ -42,9 +44,8 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
 
-                //dashboard
                 <Route path="/dashboard" element={
-                  <ProtectedRoute >
+                  <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
                 } />
@@ -54,6 +55,9 @@ function App() {
                     <AdminDashboard />
                   </ProtectedRoute>
                 } />
+
+                
+
 
               </Routes>
             </div>
