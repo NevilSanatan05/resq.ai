@@ -9,6 +9,13 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // List of allowed rescue team member emails
+  const allowedRescueEmails = [
+    "rescue1@example.com",
+    "rescue2@example.com",
+    "rescue@resqai.com"
+  ];
+
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -17,10 +24,18 @@ const Login = () => {
       if (email === "admin@123gmail.com" && password === "teamnexus05@") {
         alert("Admin logged in!");
         navigate("/admin-dashboard"); // Redirect to admin dashboard
-      } else {
+      } 
+      // Check if rescue team member
+      else if (allowedRescueEmails.includes(email.toLowerCase())) {
+        await login(email, password);
+        alert("Rescue team member logged in!");
+        navigate("/rescue"); // Redirect to rescue dashboard
+      }
+      // Regular user
+      else {
         await login(email, password);
         alert("Logged in!");
-        navigate("/dashboard"); // ✅ after login redirect
+        navigate("/dashboard"); // Regular user dashboard
       }
     } catch (err) {
       alert(err.message);
