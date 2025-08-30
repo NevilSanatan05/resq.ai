@@ -129,6 +129,25 @@ const teamStatus = [
   { id: 4, name: 'NDRF Team 2', status: 'Available', members: 12, location: 'Kolkata' },
 ];
 
+// Sample data - in a real app, this would come from an API
+const sampleAlerts = [
+  { id: 1, location: 'Mumbai', state: 'Maharashtra', region: 'Western', district: 'Mumbai', type: 'Flood', severity: 'High', timestamp: '2023-05-15T10:30:00' },
+  { id: 2, location: 'Pune', state: 'Maharashtra', region: 'Western', district: 'Pune', type: 'Earthquake', severity: 'Critical', timestamp: '2023-05-15T11:45:00' },
+  { id: 3, location: 'Bangalore', state: 'Karnataka', region: 'Southern', district: 'Bangalore Urban', type: 'Fire', severity: 'High', timestamp: '2023-05-14T09:15:00' },
+  { id: 4, location: 'Hyderabad', state: 'Telangana', region: 'Southern', district: 'Hyderabad', type: 'Cyclone', severity: 'Medium', timestamp: '2023-05-14T14:20:00' },
+  { id: 5, location: 'Delhi', state: 'Delhi', region: 'Northern', district: 'New Delhi', type: 'Heat Wave', severity: 'Critical', timestamp: '2023-05-13T13:10:00' },
+  { id: 6, location: 'Chennai', state: 'Tamil Nadu', region: 'Southern', district: 'Chennai', type: 'Flood', severity: 'High', timestamp: '2023-05-13T16:45:00' },
+  { id: 7, location: 'Jaipur', state: 'Rajasthan', region: 'Western', district: 'Jaipur', type: 'Drought', severity: 'Medium', timestamp: '2023-05-12T10:00:00' },
+];
+
+const sampleResponseTeams = [
+  { id: 1, name: 'Team Alpha', status: 'Deployed', location: 'Mumbai', state: 'Maharashtra', region: 'Western' },
+  { id: 2, name: 'Team Beta', status: 'On Standby', location: 'Pune', state: 'Maharashtra', region: 'Western' },
+  { id: 3, name: 'Team Gamma', status: 'In Transit', location: 'Bangalore', state: 'Karnataka', region: 'Southern' },
+  { id: 4, name: 'Team Delta', status: 'Available', location: 'Hyderabad', state: 'Telangana', region: 'Southern' },
+  { id: 5, name: 'Team Epsilon', status: 'Deployed', location: 'Delhi', state: 'Delhi', region: 'Northern' },
+];
+
 const AdminDashboard = () => {
   const [currentDate] = useState(new Date());
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -139,6 +158,72 @@ const AdminDashboard = () => {
   const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
   const [availableStates, setAvailableStates] = useState([]);
   const [availableDistricts, setAvailableDistricts] = useState([]);
+  
+  // Filter data based on selected filters
+  const filterData = (data) => {
+    return data.filter(item => {
+      const matchesRegion = !selectedRegion || item.region === selectedRegion;
+      const matchesState = !selectedState || item.state === selectedState;
+      const matchesDistrict = !selectedDistrict || item.district === selectedDistrict;
+      return matchesRegion && matchesState && matchesDistrict;
+    });
+  };
+  
+  // Get filtered data
+  const filteredAlerts = filterData(sampleAlerts);
+  const filteredTeams = filterData(sampleResponseTeams);
+  
+  // Calculate statistics based on filtered data
+  const criticalAlerts = filteredAlerts.filter(alert => alert.severity === 'Critical').length;
+  const teamsDeployed = filteredTeams.filter(team => team.status === 'Deployed').length;
+  const peopleAffected = filteredAlerts.length * 200; // Simplified calculation
+
+  const generateChartData = () => {
+    // Generate SOS data based on filtered alerts
+    const last7Days = Array(7).fill().map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return date.toLocaleDateString('en-US', { weekday: 'short' });
+    });
+
+    const sosData = last7Days.map(day => {
+      const dayAlerts = filteredAlerts.filter(alert => {
+        const alertDay = new Date(alert.timestamp).toLocaleDateString('en-US', { weekday: 'short' });
+        return alertDay === day;
+      });
+      
+      return {
+        name: day,
+        critical: dayAlerts.filter(a => a.severity === 'Critical').length,
+        high: dayAlerts.filter(a => a.severity === 'High').length,
+        medium: dayAlerts.filter(a => a.severity === 'Medium').length
+      };
+    });
+
+    // Generate response time data (simplified)
+    const responseTimeData = last7Days.map((day, i) => ({
+      name: day,
+      avgResponse: 25 + Math.floor(Math.random() * 30), // Random between 25-55
+      target: 30
+    }));
+
+    // Generate disaster type data
+    const disasterTypes = [...new Set(filteredAlerts.map(a => a.type))];
+    const disasterTypeData = disasterTypes.map(type => ({
+      name: type,
+      value: filteredAlerts.filter(a => a.type === type).length
+    }));
+
+    // If no data, show some default values
+    if (disasterTypeData.length === 0) {
+      disasterTypeData.push({ name: 'No data', value: 1 });
+    }
+
+    return { sosData, responseTimeData, disasterTypeData };
+  };
+
+  const { sosData, responseTimeData, disasterTypeData } = generateChartData();
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   // Update available states when region changes
   useEffect(() => {
@@ -346,32 +431,32 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard 
               title="Active Alerts" 
-              value="24" 
-              change="+5 from yesterday" 
+              value={filteredAlerts.length} 
+              change={`${Math.floor(Math.random() * 5) + 1} in last hour`} 
               isPositive={false} 
               icon={<FiAlertTriangle className="text-red-500" size={24} />}
               color="red"
             />
             <StatCard 
               title="Teams Deployed" 
-              value="8" 
-              change="3 in last hour" 
+              value={filteredTeams.filter(t => t.status === 'Deployed').length} 
+              change={`${Math.floor(Math.random() * 3) + 1} in last hour`} 
               isPositive={true} 
               icon={<FiUsers className="text-blue-500" size={24} />}
               color="blue"
             />
             <StatCard 
               title="Avg. Response Time" 
-              value="28 mins" 
-              change="12% faster" 
+              value={`${25 + Math.floor(Math.random() * 15)} mins`} 
+              change={`${Math.floor(Math.random() * 20) + 1}% faster`} 
               isPositive={true} 
               icon={<FiClock className="text-green-500" size={24} />}
               color="green"
             />
             <StatCard 
               title="People Affected" 
-              value="1.2K" 
-              change="+320 today" 
+              value={`${(filteredAlerts.length * 200).toLocaleString()}`} 
+              change={`+${Math.floor(Math.random() * 100) + 50} today`} 
               isPositive={false} 
               icon={<FiUsers className="text-purple-500" size={24} />}
               color="purple"
@@ -449,34 +534,41 @@ const AdminDashboard = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {recentAlerts.map((alert) => (
-                      <tr key={alert.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {alert.location}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {alert.type}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getSeverityColor(alert.severity)}`}>
-                            {alert.severity}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            {alert.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {alert.time}
+                    {filteredAlerts.length > 0 ? (
+                      filteredAlerts.slice(0, 5).map((alert) => (
+                        <tr key={alert.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{alert.location}, {alert.district}</div>
+                            <div className="text-xs text-gray-500">{alert.state}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{alert.type}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getSeverityColor(alert.severity)}`}>
+                              {alert.severity}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(alert.timestamp).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span className="text-green-600">Active</span>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No alerts found for the selected filters
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -486,27 +578,46 @@ const AdminDashboard = () => {
           {/* Rescue Teams Status */}
           <div className="mt-8">
             <ChartCard title="Rescue Teams Status">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                {teamStatus.map((team) => (
-                  <div key={team.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{team.name}</h4>
-                        <p className="text-sm text-gray-500">{team.location}</p>
-                        <p className="text-sm mt-2">
-                          <span className="font-medium">Members:</span> {team.members}
-                        </p>
-                      </div>
-                      <span className={`h-3 w-3 rounded-full ${getStatusColor(team.status)}`} title={team.status}></span>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500">Status:</span>
-                        <span className="font-medium">{team.status}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredTeams.length > 0 ? (
+                      filteredTeams.map((team) => (
+                        <tr key={team.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{team.name}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(team.status)} text-white`}>
+                              {team.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{team.location}</div>
+                            <div className="text-xs text-gray-500">{team.state}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {Math.floor(Math.random() * 60)} mins ago
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No teams found for the selected filters
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </ChartCard>
           </div>
