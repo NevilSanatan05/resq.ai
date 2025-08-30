@@ -14,7 +14,7 @@ const Login = () => {
     setLoading(true);
     try {
       // Check if admin credentials
-      if (email === "admin@123" && password === "teamnexus05@") {
+      if (email === "admin@123gmail.com" && password === "teamnexus05@") {
         alert("Admin logged in!");
         navigate("/admin-dashboard"); // Redirect to admin dashboard
       } else {
