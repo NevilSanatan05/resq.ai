@@ -10,6 +10,7 @@ import SOSButton from "./components/SOSButton";
 import Login from "./pages/Login";
 import Register from "./pages/Signup"; // Import the Register componen
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import Dashboard from "./pages/Dashboard";
 
@@ -47,7 +48,13 @@ function App() {
                     <Dashboard />
                   </ProtectedRoute>
                 } />
-                
+
+                <Route path="/admin-dashboard" element={
+                  <ProtectedRoute >
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+
               </Routes>
             </div>
             <SOSButton />
