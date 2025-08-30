@@ -1,47 +1,67 @@
-import { createContext, useState, useEffect } from "react";
+// src/context/AuthContext.jsx
+import { createContext, useContext, useEffect, useState } from "react";
+import { 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile
+} from "firebase/auth";
+import { auth, googleProvider } from "../config/firebase";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("authUser");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const signup = (username, password, role) => {
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    if (users.find((u) => u.username === username)) {
-      return { success: false, message: "User already exists" };
-    }
-    const newUser = { username, password, role };
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    return { success: true, message: "Signup successful" };
+  const register = async (email, password, fullName) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Update the user profile to include the display name
+    await updateProfile(userCredential.user, {
+      displayName: fullName
+    });
+    return userCredential;
   };
 
-  const login = (username, password) => {
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    const found = users.find((u) => u.username === username && u.password === password);
-    if (found) {
-      setUser(found);
-      localStorage.setItem("authUser", JSON.stringify(found));
-      return { success: true, role: found.role };
-    }
-    return { success: false, message: "Invalid credentials" };
+  const login = (email, password) => {
+    return signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const loginWithGoogle = () => {
+    return signInWithPopup(auth, googleProvider);
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem("authUser");
+    return signOut(auth);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const value = {
+    currentUser,
+    register,
+    login,
+    loginWithGoogle,
+    logout,
   };
 
   return (
-    <AuthContext.Provider value={{ user, signup, login, logout }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
-}
+};
