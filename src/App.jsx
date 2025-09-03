@@ -1,72 +1,98 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Citizen from "./pages/Citizen";
-import Rescue from "./pages/Rescue";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import SOSButton from "./components/SOSButton";
-import Login from "./pages/Login";
-import Register from "./pages/Signup"; // Import the Register componen
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./pages/AdminDashboard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { SOSProvider } from './context/SOSContext';
+import { ToastProvider } from './context/ToastContext';
 
-import Dashboard from "./pages/Dashboard";
+// Layout Components
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import SOSButton from './components/SOSButton';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import { AuthProvider } from "./context/AuthContext";
-import { SOSProvider } from "./context/SOSContext";
-import RescueDashboard from "./pages/RescueDashboard";
+// Pages
+import Home from './pages/Home';
+import Citizen from './pages/Citizen';
+import RescueDashboard from './pages/RescueDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import NotFound from './pages/NotFound';
+import ToastTest from './components/ToastTest';
 
+// A wrapper to handle authentication redirects
+const AuthWrapper = ({ children }) => {
+  const { currentUser } = useAuth();
+  
+  // If user is logged in, redirect to appropriate dashboard
+  if (currentUser) {
+    if (currentUser.role === 'admin') {
+      return <Navigate to="/admin-dashboard" replace />;
+    } else if (currentUser.role === 'rescue') {
+      return <Navigate to="/rescue-dashboard" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+};
 
 function App() {
   return (
     <div className="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
-      <Router>
-       
+      <ToastProvider>
+        <Router>
           <AuthProvider>
             <SOSProvider>
-            <Navbar />
-            <div className="flex-grow p-6">
+              <Navbar />
+              <div className="flex-grow p-4 md:p-6">
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/citizen" element={<Citizen />} />
+                <Route path="/test-toast" element={<ToastTest />} />
                 
-                {/* Rescue Dashboard Route - Only accessible by rescue team */}
-                <Route path="/rescue" element={
-                  <ProtectedRoute allowedRoles={['rescue']}>
-                    <RescueDashboard />
-                  </ProtectedRoute>
+                {/* Auth Routes */}
+                <Route path="/login" element={
+                  <AuthWrapper>
+                    <Login />
+                  </AuthWrapper>
                 } />
-                
-               
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/register" element={
+                  <AuthWrapper>
+                    <Register />
+                  </AuthWrapper>
+                } />
 
+                {/* Protected Routes */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
                 } />
 
-                <Route path="/admin-dashboard" element={
-                  <ProtectedRoute >
+                <Route path="/admin-dashboard/*" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 } />
 
-                
+                <Route path="/rescue-dashboard/*" element={
+                  <ProtectedRoute allowedRoles={['rescue']}>
+                    <RescueDashboard />
+                  </ProtectedRoute>
+                }/>
 
-
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
-            </div>
-            <SOSButton />
-            <Footer />
+              </div>
+              <Footer />
+              <SOSButton />
             </SOSProvider>
           </AuthProvider>
-       
-      </Router>
+        </Router>
+      </ToastProvider>
     </div>
   );
 }
