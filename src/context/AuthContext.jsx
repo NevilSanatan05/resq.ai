@@ -40,23 +40,13 @@ export const AuthProvider = ({ children }) => {
         passwordConfirm
       });
       
-      const { token, data } = response.data;
-      setAuthToken(token);
-      setCurrentUser(data.user);
-      
       // Show success toast
-      showToast('Account created successfully!', 'success');
+      showToast(response.data.message || 'Account created successfully! Please log in.', 'success');
       
-      // Redirect based on role
-      if (data.user.role === 'admin') {
-        navigate('/admin-dashboard');
-      } else if (data.user.role === 'rescue') {
-        navigate('/rescue-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      // Redirect to login page
+      navigate('/login');
       
-      return data.user;
+      return { success: true };
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
       throw err;
