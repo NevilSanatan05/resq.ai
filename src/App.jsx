@@ -55,8 +55,14 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
-                <Route path="/citizen" element={<Citizen />} />
                 <Route path="/test-toast" element={<ToastTest />} />
+                
+                {/* Protected Citizen Route */}
+                <Route path="/citizen" element={
+                  <ProtectedRoute>
+                    <Citizen />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Auth Routes */}
                 <Route path="/login" element={

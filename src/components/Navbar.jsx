@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   BsBell,
+  BsQuestionCircle,
   BsExclamationTriangle,
   BsFileEarmarkText,
   BsBoxArrowRight,
@@ -37,6 +38,7 @@ const navConfig = {
   user: [
     { name: 'Report', path: '/report', icon: <BsFileEarmarkText className="mr-2" /> },
     { name: 'Alerts', path: '/alerts', icon: <BsExclamationTriangle className="mr-2" /> },
+    { name: 'Help Status', path: '/citizen', icon: <BsClipboardData className="mr-2" /> }
   ]
 };
 
