@@ -1,72 +1,147 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import Citizen from "./pages/Citizen";
-import Rescue from "./pages/Rescue";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import SOSButton from "./components/SOSButton";
-import Login from "./pages/Login";
-import Register from "./pages/Signup"; // Import the Register componen
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./pages/AdminDashboard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { SOSProvider } from './context/SOSContext';
+import { ToastProvider } from './context/ToastContext';
 
-import Dashboard from "./pages/Dashboard";
+// Layout Components
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import SOSButton from './components/SOSButton';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import { AuthProvider } from "./context/AuthContext";
-import { SOSProvider } from "./context/SOSContext";
-import RescueDashboard from "./pages/RescueDashboard";
+// Pages
+import Home from './pages/Home';
+import Citizen from './pages/Citizen';
+import RescueDashboard from './pages/RescueDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import NotFound from './pages/NotFound';
+import ToastTest from './components/ToastTest';
 
+// Team Management Pages
+import Teams from './pages/Teams';
+import MyTeams from './pages/MyTeams';
+import CreateTeam from './pages/CreateTeam';
+import TeamAnalytics from './pages/TeamAnalytics';
+
+// A wrapper to handle authentication redirects
+const AuthWrapper = ({ children }) => {
+  const { currentUser } = useAuth();
+  
+  // If user is logged in, redirect to appropriate dashboard
+  if (currentUser) {
+    if (currentUser.role === 'admin') {
+      return <Navigate to="/admin-dashboard" replace />;
+    } else if (currentUser.role === 'rescue') {
+      return <Navigate to="/rescue-dashboard" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+};
 
 function App() {
   return (
     <div className="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
-      <Router>
-       
+      <ToastProvider>
+        <Router>
           <AuthProvider>
             <SOSProvider>
-            <Navbar />
-            <div className="flex-grow p-6">
+              <Navbar />
+              <div className="flex-grow p-4 md:p-6">
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Home />} />
-                <Route path="/citizen" element={<Citizen />} />
+                <Route path="/test-toast" element={<ToastTest />} />
                 
-                {/* Rescue Dashboard Route - Only accessible by rescue team */}
-                <Route path="/rescue" element={
-                  <ProtectedRoute allowedRoles={['rescue']}>
-                    <RescueDashboard />
+                {/* Protected Citizen Route */}
+                <Route path="/citizen" element={
+                  <ProtectedRoute>
+                    <Citizen />
                   </ProtectedRoute>
                 } />
                 
-               
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="*" element={<NotFound />} />
+                {/* Auth Routes */}
+                <Route path="/login" element={
+                  <AuthWrapper>
+                    <Login />
+                  </AuthWrapper>
+                } />
+                <Route path="/register" element={
+                  <AuthWrapper>
+                    <Register />
+                  </AuthWrapper>
+                } />
 
+                {/* Protected Routes */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>
                 } />
 
-                <Route path="/admin-dashboard" element={
-                  <ProtectedRoute >
+                <Route path="/admin-dashboard/*" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <AdminDashboard />
                   </ProtectedRoute>
                 } />
 
+                <Route path="/rescue-dashboard/*" element={
+                  <ProtectedRoute allowedRoles={['rescue']}>
+                    <RescueDashboard />
+                  </ProtectedRoute>
+                }/>
+
+                {/* Team Management Routes */}
                 
+                {/* All Teams - Admin and Rescue can view */}
+                <Route path="/teams" element={
+                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                    <Teams />
+                  </ProtectedRoute>
+                } />
 
+                {/* My Teams - Admin and Rescue can view their teams */}
+                <Route path="/my-teams" element={
+                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                    <MyTeams />
+                  </ProtectedRoute>
+                } />
 
+                {/* Create Team - Admin and Rescue can create teams */}
+                <Route path="/teams/create" element={
+                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                    <CreateTeam />
+                  </ProtectedRoute>
+                } />
+
+                {/* Team Analytics - Admin only */}
+                <Route path="/teams/analytics" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <TeamAnalytics />
+                  </ProtectedRoute>
+                } />
+
+                {/* Individual Team View - Admin and Rescue can view */}
+                <Route path="/teams/:teamId" element={
+                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                    <Teams />
+                  </ProtectedRoute>
+                } />
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
-            </div>
-            <SOSButton />
-            <Footer />
+              </div>
+              <Footer />
+              <SOSButton />
             </SOSProvider>
           </AuthProvider>
-       
-      </Router>
+        </Router>
+      </ToastProvider>
     </div>
   );
 }

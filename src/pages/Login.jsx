@@ -1,58 +1,33 @@
-import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 
 const Login = () => {
-  const { login, loginWithGoogle } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const { showToast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
-  // List of allowed rescue team member emails
-  const allowedRescueEmails = [
-    "rescue1@example.com",
-    "rescue2@example.com",
-    "rescue@resqai.com"
-  ];
-
-  const handleEmailLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      // First try to authenticate with Firebase
-      await login(email, password);
-      
-      // Check if admin credentials
-      if (email === "admin@123gmail.com") {
-        alert("Admin logged in successfully!");
-        navigate("/admin-dashboard");
-      } 
-      // Check if rescue team member
-      else if (allowedRescueEmails.includes(email.toLowerCase())) {
-        alert("Rescue team member logged in!");
-        navigate("/rescue");
-      }
-      // Regular user
-      else {
-        alert("Logged in successfully!");
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+    
+    if (!email || !password) {
+      showToast('Please fill in all fields', 'error');
+      return;
     }
-  };
 
-  const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await loginWithGoogle();
-      alert("Google Login Success!");
-      navigate("/dashboard"); // ✅ redirect after google login
+      await login(email, password);
+      // The success toast is now handled by AuthContext
     } catch (err) {
-      alert(err.message);
+      // Error toast is handled by AuthContext
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +41,7 @@ const Login = () => {
         </h2>
 
         {/* Email/Password Form */}
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-1">Email Address</label>
             <input
@@ -102,48 +77,54 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold transition disabled:opacity-50"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="my-4 flex items-center">
-          <hr className="flex-grow border-gray-700" />
-          <span className="px-2 text-gray-400 text-sm">OR</span>
-          <hr className="flex-grow border-gray-700" />
+        <div className="flex items-center my-6">
+          <div className="flex-1 h-px bg-gray-700"></div>
+          <span className="px-3 text-gray-400 text-sm">OR</span>
+          <div className="flex-1 h-px bg-gray-700"></div>
         </div>
 
-        {/* Google Login */}
+        {/* Google Login Button - Disabled for now */}
         <button
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-white text-black py-2 rounded-lg font-semibold hover:bg-gray-200 transition disabled:opacity-50"
+          disabled={true}
+          className="w-full flex items-center justify-center gap-2 bg-gray-200 text-gray-600 py-2 rounded-lg font-semibold cursor-not-allowed opacity-50"
+          title="Google login coming soon"
         >
           <img
             src="https://www.svgrepo.com/show/355037/google.svg"
             alt="Google"
             className="w-5 h-5"
           />
-          {loading ? "Please wait..." : "Continue with Google"}
+          Continue with Google (Coming Soon)
         </button>
 
         {/* Create Account Link */}
         <div className="mt-6 text-center text-sm">
-          <span className="text-gray-400">Don’t have an account? </span>
+          <span className="text-gray-400">Don't have an account? </span>
           <Link to="/register" className="text-blue-400 hover:underline">
             Create Account
           </Link>
         </div>
 
+        {/* Admin Access Note */}
+        <div className="mt-4 p-3 bg-gray-800 rounded-lg text-xs text-gray-400">
+          <p className="font-medium mb-1">Demo Access:</p>
+          <p>Admin: email@123gmail.com / your-password</p>
+          <p>Rescue Team: rescue@1gmail.com / your-password</p>
+        </div>
+
         {/* Footer */}
         <div className="mt-4 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} ResQ.AI. All rights reserved.
+          &copy; {new Date().getFullYear()} ResQ.AI. All rights reserved.
         </div>
       </div>
     </div>

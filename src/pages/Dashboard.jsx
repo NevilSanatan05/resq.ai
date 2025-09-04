@@ -1,10 +1,25 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { BsExclamationTriangle, BsFileEarmarkText, BsGeoAlt, BsBell, BsBarChart, BsGear, BsPeople } from "react-icons/bs";
+import { BsExclamationTriangle, BsFileEarmarkText, BsGeoAlt, BsBell, BsBarChart, BsGear, BsPeople, BsPeopleFill } from "react-icons/bs";
+import ReportModal from "../components/ReportModal";
+import RequestJoinTeam from "../components/RequestJoinTeam";
 
 export default function DisasterDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isJoinTeamModalOpen, setIsJoinTeamModalOpen] = useState(false);
   const { currentUser } = useAuth();
+
+  const handleReportSubmit = (reportData) => {
+    console.log('Report submitted:', reportData);
+    // TODO: Add API call to submit report
+  };
+
+  const handleJoinTeamRequest = (requestData) => {
+    console.log('Join team request:', requestData);
+    // TODO: Add API call to submit join team request
+    // After submission, you might want to update the UI or show a success message
+  };
 
   const tabs = [
     { id: "overview", label: "Overview", icon: <BsBarChart /> },
@@ -12,6 +27,7 @@ export default function DisasterDashboard() {
     { id: "map", label: "Live Map", icon: <BsGeoAlt /> },
     { id: "alerts", label: "Alerts", icon: <BsExclamationTriangle /> },
     { id: "community", label: "Community", icon: <BsPeople /> },
+    { id: "teams", label: "Teams", icon: <BsPeopleFill /> },
     { id: "settings", label: "Settings", icon: <BsGear /> },
   ];
 
@@ -30,9 +46,32 @@ export default function DisasterDashboard() {
               <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
             </button>
           </div>
-          <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg flex items-center">
-            <BsExclamationTriangle className="mr-2" /> Report Incident
-          </button>
+          <div className="flex space-x-3">
+            <button 
+              onClick={() => setIsJoinTeamModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center"
+            >
+              <BsPeopleFill className="mr-2" /> Join Team
+            </button>
+            
+            <button 
+              onClick={() => setIsReportModalOpen(true)}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg flex items-center"
+            >
+              <BsExclamationTriangle className="mr-2" /> Report Incident
+            </button>
+          </div>
+          
+          <ReportModal 
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            onSubmit={handleReportSubmit}
+          />
+          <RequestJoinTeam
+            isOpen={isJoinTeamModalOpen}
+            onClose={() => setIsJoinTeamModalOpen(false)}
+            onSubmit={handleJoinTeamRequest}
+          />
         </div>
       </header>
 

@@ -1,8 +1,12 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { SOSContext } from "../context/SOSContext";
+import { useToast } from "../context/ToastContext";
+import axios from 'axios';
 
 function Citizen() {
   const { sendSOS } = useContext(SOSContext);
+  const { showToast } = useToast();
+  const API_URL = 'http://localhost:5000/api';
 
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");
@@ -10,7 +14,37 @@ function Citizen() {
   const [lastSOS, setLastSOS] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [lastIncidentId, setLastIncidentId] = useState(null);
+
+  useEffect(() => {
+    let timer;
+    if (lastIncidentId) {
+      const poll = async () => {
+        try {
+          const res = await axios.get(`${API_URL}/incidents/${lastIncidentId}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          });
+          const inc = res.data?.data?.incident;
+          if (inc?.status === 'accepted') {
+            const leader = inc.acceptedBy?.leader?.name || 'Team Leader';
+            showToast(`Help is on the way! Team: ${inc.acceptedBy?.name}, Leader: ${leader}. ETA: ${inc.etaMinutes || 'N/A'} min`, 'success');
+            clearInterval(timer);
+          } else if (inc?.status === 'cancelled') {
+            showToast('No help is reaching as ResQ.AI has cancelled help.', 'error');
+            clearInterval(timer);
+          } else if (inc?.status === 'assigned' && !inc.acceptedBy) {
+            // continue polling
+          }
+        } catch (e) {
+          // ignore transient errors
+        }
+      };
+      timer = setInterval(poll, 5000);
+    }
+    return () => timer && clearInterval(timer);
+  }, [lastIncidentId]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -21,30 +55,43 @@ function Citizen() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const sosData = {
-          id: Date.now(),
-          location: `${pos.coords.latitude}, ${pos.coords.longitude}`,
-          message,
-          contact,
-          emergencyType,
-          time: new Date().toLocaleString(),
+          title: emergencyType,
+          description: message,
+          reporter: { phone: contact },
+          location: {
+            coordinates: {
+              type: 'Point',
+              coordinates: [pos.coords.longitude, pos.coords.latitude]
+            }
+          },
+          priority: 'high'
         };
 
-        sendSOS(sosData); // 🔔 send to global context
-        setLastSOS(sosData);
+        try {
+          const incident = await sendSOS(sosData); // POST to backend
+          setLastSOS({
+            emergencyType,
+            location: `${pos.coords.latitude}, ${pos.coords.longitude}`,
+            message,
+            contact,
+            time: new Date().toLocaleString(),
+          });
+          setLastIncidentId(incident._id);
+          showToast('SOS sent successfully!', 'success');
+        } catch (err) {
+          showToast('Failed to send SOS', 'error');
+        }
 
         setMessage("");
         setContact("");
         setEmergencyType("Flood");
         setLoading(false);
 
-        alert(
-          `🚨 SOS Sent!\n\nType: ${sosData.emergencyType}\nLocation: ${sosData.location}\nMessage: ${sosData.message}\nContact: ${sosData.contact}`
-        );
       },
       () => {
-        alert("❌ Could not fetch location. Please enable GPS.");
+        showToast("Could not fetch location. Please enable GPS.", 'error');
         setLoading(false);
       }
     );

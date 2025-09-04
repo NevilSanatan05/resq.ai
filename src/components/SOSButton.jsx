@@ -1,45 +1,53 @@
 import { useState, useContext } from "react";
 import { SOSContext } from "../context/SOSContext";
+import { useToast } from "../context/ToastContext";
 
 function SOSButton() {
   const { sendSOS } = useContext(SOSContext);   // use global SOS context
+  const { showToast } = useToast();
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSOS = (e) => {
+  const handleSOS = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     if (!navigator.geolocation) {
-      alert("❌ Geolocation is not supported by your browser.");
+      showToast("Geolocation is not supported by your browser.", 'error');
       setLoading(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const sosData = {
-          id: Date.now(),
-          name,
-          contact,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          time: new Date().toLocaleString(),
+          title: 'Emergency Report',
+          description: `Quick SOS from ${name}`,
+          reporter: { name, phone: contact },
+          location: {
+            coordinates: {
+              type: 'Point',
+              coordinates: [position.coords.longitude, position.coords.latitude]
+            }
+          },
+          priority: 'high'
         };
 
-        sendSOS(sosData);   // 🔔 send to global state (Rescue + Admin will see)
-
-        alert(
-          `🚨 SOS Sent!\n\nName: ${sosData.name}\nContact: ${sosData.contact}\nLat: ${sosData.latitude}\nLong: ${sosData.longitude}`
-        );
+        try {
+          const incident = await sendSOS(sosData);   // POST to backend and store
+          showToast('SOS sent successfully!', 'success');
+        } catch (err) {
+          console.error(err);
+          showToast('Failed to send SOS', 'error');
+        }
 
         setName("");
         setContact("");
         setLoading(false);
       },
       () => {
-        alert("❌ Could not get location. Please allow location access.");
+        showToast("Could not get location. Please allow location access.", 'error');
         setLoading(false);
       }
     );

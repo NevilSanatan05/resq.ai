@@ -1,8 +1,10 @@
 import { createContext, useState, useEffect } from "react";
+import axios from 'axios';
 
 export const SOSContext = createContext();
 
 export function SOSProvider({ children }) {
+  const API_URL = 'http://localhost:5000/api';
   // Load saved data from localStorage on init
   const [requests, setRequests] = useState(() => {
     const saved = localStorage.getItem("sos_requests");
@@ -23,9 +25,17 @@ export function SOSProvider({ children }) {
     localStorage.setItem("sos_missions", JSON.stringify(missions));
   }, [missions]);
 
-  // Citizen sends SOS
-  const sendSOS = (sosData) => {
-    setRequests((prev) => [...prev, sosData]);
+  // Citizen sends SOS -> backend incident
+  const sendSOS = async (sosData) => {
+    const { title, description, reporter, location, priority } = sosData;
+    const res = await axios.post(`${API_URL}/incidents`, {
+      title, description, reporter, location, priority
+    }, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const incident = res.data.data.incident;
+    setRequests((prev) => [...prev, { ...sosData, id: incident._id }]);
+    return incident;
   };
 
   // Rescue accepts SOS
