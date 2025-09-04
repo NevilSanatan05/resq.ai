@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 import { format } from 'date-fns';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { FiFilter, FiCalendar,FiChevronDown, FiAlertTriangle, FiUsers , FiClock,FiChevronUp } from 'react-icons/fi';
+import { FiFilter, FiCalendar,FiChevronDown, FiAlertTriangle, FiUsers , FiClock,FiChevronUp, FiPlus, FiUserPlus, FiActivity } from 'react-icons/fi';
 
 // Region and state data
 const regions = [
@@ -148,7 +150,20 @@ const sampleResponseTeams = [
   { id: 5, name: 'Team Epsilon', status: 'Deployed', location: 'Delhi', state: 'Delhi', region: 'Northern' },
 ];
 
+const API_URL = 'http://localhost:5000/api';
+
 const AdminDashboard = () => {
+  const { showToast } = useToast();
+  const [incidents, setIncidents] = useState([]);
+  const [incidentsLoading, setIncidentsLoading] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assignIncidentId, setAssignIncidentId] = useState(null);
+  const [assignTeamId, setAssignTeamId] = useState('');
+  const [assignEta, setAssignEta] = useState('30');
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelIncidentId, setCancelIncidentId] = useState(null);
+  const [cancelReason, setCancelReason] = useState('No teams available');
   const [currentDate] = useState(new Date());
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedState, setSelectedState] = useState('');
@@ -242,6 +257,78 @@ const AdminDashboard = () => {
       setSelectedDistrict('');
     }
   }, [selectedState]);
+
+  // Load teams and incidents
+  const fetchIncidents = async () => {
+    try {
+      setIncidentsLoading(true);
+      const res = await axios.get(`${API_URL}/incidents`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setIncidents(res.data?.data?.incidents || []);
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to load incidents', 'error');
+    } finally {
+      setIncidentsLoading(false);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/teams`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setTeams(res.data?.data?.teams || []);
+    } catch (e) {
+      // silent
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+    fetchTeams();
+  }, []);
+
+  const openAssignModal = (incidentId) => {
+    if (teams.length === 0) {
+      showToast('No teams found. Create a team to assign this incident.', 'error');
+      return;
+    }
+    setAssignIncidentId(incidentId);
+    setAssignTeamId(teams[0]?._id || '');
+    setAssignEta('30');
+    setAssignModalOpen(true);
+  };
+
+  const submitAssign = async () => {
+    try {
+      await axios.post(`${API_URL}/incidents/${assignIncidentId}/assign`, {
+        teamId: assignTeamId,
+        etaMinutes: assignEta ? parseInt(assignEta, 10) : undefined
+      }, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setAssignModalOpen(false);
+      showToast('Incident assigned', 'success');
+      fetchIncidents();
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || 'Failed to assign incident', 'error');
+    }
+  };
+
+  const openCancelModal = (incidentId) => {
+    setCancelIncidentId(incidentId);
+    setCancelReason('No teams available');
+    setCancelModalOpen(true);
+  };
+
+  const submitCancel = async () => {
+    try {
+      await axios.post(`${API_URL}/incidents/${cancelIncidentId}/cancel`, { reason: cancelReason }, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setCancelModalOpen(false);
+      showToast('Incident cancelled', 'success');
+      fetchIncidents();
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || 'Failed to cancel incident', 'error');
+    }
+  };
 
   const getSeverityColor = (severity) => {
     switch(severity.toLowerCase()) {
@@ -578,14 +665,34 @@ const AdminDashboard = () => {
           {/* Rescue Teams Status */}
           <div className="mt-8">
             <ChartCard title="Rescue Teams Status">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Teams</h3>
+                <div className="flex gap-2">
+                <button
+                  onClick={() => window.location.href = '/teams'}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <FiUsers size={16} />
+                  View All Teams
+                </button>
+                  <button
+                    onClick={() => window.location.href = '/teams/create'}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                  >
+                    <FiPlus size={16} />
+                    Create Team
+                  </button>
+                </div>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Members</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -593,31 +700,213 @@ const AdminDashboard = () => {
                       filteredTeams.map((team) => (
                         <tr key={team.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <FiUsers className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">{team.name}</div>
+                                <div className="text-sm text-gray-500">{team.specialization?.join(', ') || 'General'}</div>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(team.status)} text-white`}>
                               {team.status}
                             </span>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {team.members || 0} / {team.capacity || 10}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{team.location}</div>
                             <div className="text-xs text-gray-500">{team.state}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {Math.floor(Math.random() * 60)} mins ago
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => window.location.href = `/teams/${team.id}`}
+                                className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50"
+                              >
+                                View
+                              </button>
+                              <button
+                                onClick={() => window.location.href = `/teams/${team.id}/edit`}
+                                className="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50"
+                              >
+                                Edit
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
                           No teams found for the selected filters
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+              </div>
+            </ChartCard>
+          </div>
+
+          {/* Incidents Management */}
+          <div className="mt-8">
+            <ChartCard title="Incidents Management">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Active Incidents</h3>
+                <button onClick={fetchIncidents} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded">Refresh</button>
+              </div>
+              {incidentsLoading ? (
+                <div className="p-6 text-center text-gray-500">Loading incidents...</div>
+              ) : incidents.length === 0 ? (
+                <div className="p-6 text-center text-gray-500">No incidents available</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Team</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ETA</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {incidents.map((inc) => (
+                        <tr key={inc._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{inc.title}</div>
+                            <div className="text-xs text-gray-500">{inc.description || 'No description'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{inc.status}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{inc.assignedTeam?.name || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{inc.etaMinutes || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex gap-2">
+                              <button onClick={() => openAssignModal(inc._id)} className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
+                              <button onClick={() => openCancelModal(inc._id)} className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">Cancel</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </ChartCard>
+          </div>
+
+          {/* Assign Modal */}
+          {assignModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Assign Incident</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Select Team</label>
+                    <select
+                      value={assignTeamId}
+                      onChange={(e) => setAssignTeamId(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    >
+                      {teams.map(team => (
+                        <option key={team._id} value={team._id}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">ETA (minutes)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={assignEta}
+                      onChange={(e) => setAssignEta(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button onClick={() => setAssignModalOpen(false)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
+                  <button onClick={submitAssign} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Assign</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Cancel Modal */}
+          {cancelModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Cancel Incident</h3>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">Reason</label>
+                  <textarea
+                    rows="3"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button onClick={() => setCancelModalOpen(false)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">Back</button>
+                  <button onClick={submitCancel} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">Confirm Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Team Actions */}
+          <div className="mt-8">
+            <ChartCard title="Team Management Quick Actions">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="p-3 bg-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <FiUsers className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h4 className="text-lg font-medium text-blue-900 mb-2">Create New Team</h4>
+                  <p className="text-sm text-blue-700 mb-4">Set up a new rescue team with members and specializations</p>
+                  <button
+                    onClick={() => window.location.href = '/teams/create'}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Create Team
+                  </button>
+                </div>
+
+                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
+                  <div className="p-3 bg-green-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <FiUserPlus className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h4 className="text-lg font-medium text-green-900 mb-2">Manage Members</h4>
+                  <p className="text-sm text-green-700 mb-4">Add, remove, or reassign team members across all teams</p>
+                  <button
+                    onClick={() => window.location.href = '/teams'}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Manage Teams
+                  </button>
+                </div>
+
+                <div className="text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="p-3 bg-purple-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <FiActivity className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h4 className="text-lg font-medium text-purple-900 mb-2">Team Analytics</h4>
+                  <p className="text-sm text-purple-700 mb-4">View detailed analytics and performance metrics for all teams</p>
+                  <button
+                    onClick={() => window.location.href = '/teams/analytics'}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    View Analytics
+                  </button>
+                </div>
               </div>
             </ChartCard>
           </div>
