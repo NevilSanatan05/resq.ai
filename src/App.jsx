@@ -97,7 +97,7 @@ function App() {
 
                 {/* Team Management Routes */}
                 
-                {/* All Teams - Admin and Rescue can view */}
+              
                 <Route path="/teams" element={
                   <ProtectedRoute allowedRoles={['admin', 'rescue']}>
                     <Teams />
