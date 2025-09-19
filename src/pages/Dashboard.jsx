@@ -1,18 +1,32 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import { useToast } from "../context/ToastContext";
+
 import { BsExclamationTriangle, BsFileEarmarkText, BsGeoAlt, BsBell, BsBarChart, BsGear, BsPeople, BsPeopleFill } from "react-icons/bs";
 import ReportModal from "../components/ReportModal";
 import RequestJoinTeam from "../components/RequestJoinTeam";
+
+const API_URL = 'http://localhost:5000/api';
 
 export default function DisasterDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isJoinTeamModalOpen, setIsJoinTeamModalOpen] = useState(false);
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
 
-  const handleReportSubmit = (reportData) => {
-    console.log('Report submitted:', reportData);
-    // TODO: Add API call to submit report
+  const handleReportSubmit = async (reportData) => {
+    try {
+      await axios.post(`${API_URL}/reports`, reportData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      showToast('Report submitted successfully', 'success');
+      setIsReportModalOpen(false);
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || 'Failed to submit report', 'error');
+    }
   };
 
   const handleJoinTeamRequest = (requestData) => {
