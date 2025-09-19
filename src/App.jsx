@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import ToastTest from './components/ToastTest';
+import Contact from './pages/Contact';
 import About from './pages/About';
 
 // Team Management Pages
@@ -53,90 +54,85 @@ function App() {
             <SOSProvider>
               <Navbar />
               <div className="flex-grow p-4 md:p-6">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/test-toast" element={<ToastTest />} />
-                
-                {/* Protected Citizen Route */}
-                <Route path="/citizen" element={
-                  <ProtectedRoute>
-                    <Citizen />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Auth Routes */}
-                <Route path="/login" element={
-                  <AuthWrapper>
-                    <Login />
-                  </AuthWrapper>
-                } />
-                <Route path="/register" element={
-                  <AuthWrapper>
-                    <Register />
-                  </AuthWrapper>
-                } />
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/test-toast" element={<ToastTest />} />
+                  
+                  {/* Protected Citizen Route */}
+                  <Route path="/citizen" element={
+                    <ProtectedRoute>
+                      <Citizen />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Auth Routes */}
+                  <Route path="/login" element={
+                    <AuthWrapper>
+                      <Login />
+                    </AuthWrapper>
+                  } />
+                  <Route path="/register" element={
+                    <AuthWrapper>
+                      <Register />
+                    </AuthWrapper>
+                  } />
 
-                {/* Protected Routes */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
+                  {/* Protected Routes */}
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
 
-                <Route path="/admin-dashboard/*" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/admin-dashboard/*" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
 
-                <Route path="/rescue-dashboard/*" element={
-                  <ProtectedRoute allowedRoles={['rescue']}>
-                    <RescueDashboard />
-                  </ProtectedRoute>
-                }/>
+                  <Route path="/rescue-dashboard/*" element={
+                    <ProtectedRoute allowedRoles={['rescue']}>
+                      <RescueDashboard />
+                    </ProtectedRoute>
+                  }/>
 
-                {/* Team Management Routes */}
-                
-                {/* All Teams - Admin and Rescue can view */}
-                <Route path="/teams" element={
-                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
-                    <Teams />
-                  </ProtectedRoute>
-                } />
+                  {/* Team Management Routes */}
+                  <Route path="/teams" element={
+                    <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                      <Teams />
+                    </ProtectedRoute>
+                  } />
 
-                {/* My Teams - Admin and Rescue can view their teams */}
-                <Route path="/my-teams" element={
-                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
-                    <MyTeams />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/my-teams" element={
+                    <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                      <MyTeams />
+                    </ProtectedRoute>
+                  } />
 
-                {/* Create Team - Admin and Rescue can create teams */}
-                <Route path="/teams/create" element={
-                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
-                    <CreateTeam />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/teams/create" element={
+                    <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                      <CreateTeam />
+                    </ProtectedRoute>
+                  } />
 
-                {/* Team Analytics - Admin only */}
-                <Route path="/teams/analytics" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <TeamAnalytics />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/teams/analytics" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <TeamAnalytics />
+                    </ProtectedRoute>
+                  } />
 
-                {/* Individual Team View - Admin and Rescue can view */}
-                <Route path="/teams/:teamId" element={
-                  <ProtectedRoute allowedRoles={['admin', 'rescue']}>
-                    <Teams />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/teams/:teamId" element={
+                    <ProtectedRoute allowedRoles={['admin', 'rescue']}>
+                      <Teams />
+                    </ProtectedRoute>
+                  } />
 
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  {/* 404 Route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
               </div>
               <Footer />
               <SOSButton />

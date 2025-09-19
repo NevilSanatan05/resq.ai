@@ -22,13 +22,13 @@ function Home() {
             🚨 Send SOS
           </Link>
           <Link
-            to="/rescue"
+            to="/rescue-dashboard"
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
           >
             🛟 Rescue Dashboard
           </Link>
           <Link
-            to="/admin"
+            to="/admin-dashboard"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
           >
             🖥️ Admin Panel
