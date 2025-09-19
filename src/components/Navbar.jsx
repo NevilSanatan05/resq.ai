@@ -90,6 +90,7 @@ function Navbar() {
     ...(isAdmin ? [{ name: 'Admin Settings', path: '/admin/settings', icon: <BsShieldCheck className="mr-2" /> }] : []),
     { name: 'Sign out', action: handleLogout, icon: <BsBoxArrowRight className="mr-2" /> }
   ];
+  
 
   // Get navigation items based on role
   const getNavItems = () => {
