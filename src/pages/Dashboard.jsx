@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Bell } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import axios from "axios";
@@ -7,7 +7,7 @@ import axios from "axios";
 import ReportModal from "../components/ReportModal";
 import RequestJoinTeam from "../components/RequestJoinTeam";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function DisasterDashboard() {
   const [activeTab, setActiveTab] = useState("alerts");
@@ -20,19 +20,42 @@ export default function DisasterDashboard() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isJoinTeamModalOpen, setIsJoinTeamModalOpen] = useState(false);
 
+  const [adminAlert, setAdminAlert] = useState(null);
+
+  // Multilingual states
+  const [language, setLanguage] = useState("en");
+  const [translatedWeather, setTranslatedWeather] = useState("");
+  const [translatedAdminAlert, setTranslatedAdminAlert] = useState("");
+
   const { currentUser } = useAuth();
   const { showToast } = useToast();
 
-  // Fetch weather using supplied coordinates
+  /** Helper: translate text via API */
+  const translateText = async (text, setFn) => {
+    try {
+      if (language === "en") {
+        setFn(text);
+        return;
+      }
+      const res = await axios.post(`${API_URL}/api/translate`, {
+        text,
+        targetLang: language,
+      });
+      setFn(res.data.translated || text);
+    } catch (err) {
+      console.error("Translation error:", err);
+      setFn(text); // fallback
+    }
+  };
+
+  /** Fetch weather from server */
   const fetchWeatherFromServer = async (lat, lon) => {
     if (lat == null || lon == null) return;
-
     try {
       setLoading(true);
       setError(null);
 
-      const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-      const res = await fetch(`${base}/api/weather?lat=${lat}&lon=${lon}`);
+      const res = await fetch(`${API_URL}/api/weather?lat=${lat}&lon=${lon}`);
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -41,7 +64,12 @@ export default function DisasterDashboard() {
 
       setWeather(data);
       setRiskLevel(data.risk || "Low");
-      console.log("🌤 Weather fetched:", data);
+
+      // Translate immediately
+      translateText(
+        `${data.main}: ${data.description}, ${data.temperature}°C`,
+        setTranslatedWeather
+      );
     } catch (err) {
       console.error("Error fetching weather:", err);
       setError(err.message);
@@ -52,10 +80,24 @@ export default function DisasterDashboard() {
     }
   };
 
-  // Submit report
+  /** Fetch admin alerts */
+  const fetchAdminAlerts = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/admin/alerts`);
+      if (res.data?.latest) {
+        setAdminAlert(res.data.latest);
+        translateText(res.data.latest.message, setTranslatedAdminAlert);
+        showToast("🚨 New Admin Alert!", "info");
+      }
+    } catch (err) {
+      console.error("Admin alert fetch error:", err);
+    }
+  };
+
+  /** Submit report */
   const handleReportSubmit = async (reportData) => {
     try {
-      await axios.post(`${API_URL}/reports`, reportData, {
+      await axios.post(`${API_URL}/api/reports`, reportData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       showToast("Report submitted successfully", "success");
@@ -66,7 +108,7 @@ export default function DisasterDashboard() {
     }
   };
 
-  // Get user coordinates on mount
+  /** Get user location on mount */
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -75,9 +117,8 @@ export default function DisasterDashboard() {
           setCoordinates({ lat: latitude, lon: longitude });
           fetchWeatherFromServer(latitude, longitude);
         },
-        (err) => {
-          console.warn("Geolocation error:", err.message);
-          const fallback = { lat: 20.2961, lon: 85.8245 }; // fallback: Bhubaneswar
+        () => {
+          const fallback = { lat: 20.2961, lon: 85.8245 }; // Bhubaneswar fallback
           setCoordinates(fallback);
           fetchWeatherFromServer(fallback.lat, fallback.lon);
         }
@@ -89,6 +130,26 @@ export default function DisasterDashboard() {
     }
   }, []);
 
+  /** Poll admin alerts every 10s */
+  useEffect(() => {
+    fetchAdminAlerts();
+    const interval = setInterval(fetchAdminAlerts, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  /** Re-translate existing texts on language change */
+  useEffect(() => {
+    if (weather) {
+      translateText(
+        `${weather.main}: ${weather.description}, ${weather.temperature}°C`,
+        setTranslatedWeather
+      );
+    }
+    if (adminAlert) {
+      translateText(adminAlert.message, setTranslatedAdminAlert);
+    }
+  }, [language]);
+
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
@@ -98,30 +159,51 @@ export default function DisasterDashboard() {
           <h1 className="text-2xl font-bold text-white">Disaster Dashboard</h1>
         </div>
 
-        {/* Show coordinates */}
-        {coordinates.lat != null && coordinates.lon != null && (
+        {/* Coordinates */}
+        {coordinates.lat && coordinates.lon && (
           <p className="text-gray-300 mb-4">
-            🌍 Your Coordinates: Latitude {coordinates.lat.toFixed(4)}, Longitude{" "}
-            {coordinates.lon.toFixed(4)}
+            🌍 Lat {coordinates.lat.toFixed(4)}, Lon {coordinates.lon.toFixed(4)}
           </p>
         )}
 
-        {/* Alerts Tab */}
+        {/* Language selector */}
+        <div className="mb-4">
+          <label className="text-gray-300 mr-2">🌐 Language:</label>
+          <select
+  value={language}
+  onChange={(e) => setLanguage(e.target.value)}
+  className="bg-gray-800 text-white p-2 rounded"
+>
+  <option value="en">English</option>
+  <option value="hi">Hindi</option>
+  <option value="bn">Bengali</option>
+  <option value="te">Telugu</option>
+  <option value="mr">Marathi</option>
+  <option value="ta">Tamil</option>
+  <option value="ur">Urdu</option>
+  <option value="gu">Gujarati</option>
+  <option value="kn">Kannada</option>
+  <option value="ml">Malayalam</option>
+  <option value="or">Odia</option>
+  <option value="pa">Punjabi</option>
+  <option value="as">Assamese</option>
+  <option value="fr">French</option> {/* optional */}
+</select>
+        </div>
+
+        {/* Alerts */}
         {activeTab === "alerts" && (
           <div className="space-y-4">
-            {loading && <p className="text-gray-400">Fetching live weather data...</p>}
+            {loading && <p className="text-gray-400">Fetching live weather...</p>}
             {error && <p className="text-red-400">⚠ Error: {error}</p>}
+
             {!loading && weather && (
               <div className="bg-gray-800 p-4 rounded-xl">
-                <h3 className="text-sm font-medium text-gray-400 mb-2">
-                  Live Weather Alert
-                </h3>
+                <h3 className="text-sm text-gray-400 mb-2">Live Weather Alert</h3>
                 <div className="flex items-center justify-between">
-                  <p className="text-white">
-                    🌡 {weather.main}: {weather.description}, {weather.temperature}°C
-                  </p>
+                  <p className="text-white">🌡 {translatedWeather}</p>
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    className={`px-3 py-1 rounded-full text-sm ${
                       riskLevel === "High"
                         ? "bg-red-600 text-white"
                         : riskLevel === "Medium"
@@ -134,19 +216,24 @@ export default function DisasterDashboard() {
                 </div>
               </div>
             )}
+
+            {/* Admin Alerts */}
+            {adminAlert && (
+              <div className="bg-red-900 p-4 rounded-xl flex items-center gap-2">
+                <Bell className="w-5 h-5 text-yellow-300" />
+                <p className="text-yellow-100 font-medium">
+                  🚨 {translatedAdminAlert || adminAlert.message}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Modals */}
         {isReportModalOpen && (
-          <ReportModal
-            onClose={() => setIsReportModalOpen(false)}
-            onSubmit={handleReportSubmit}
-          />
+          <ReportModal onClose={() => setIsReportModalOpen(false)} onSubmit={handleReportSubmit} />
         )}
-        {isJoinTeamModalOpen && (
-          <RequestJoinTeam onClose={() => setIsJoinTeamModalOpen(false)} />
-        )}
+        {isJoinTeamModalOpen && <RequestJoinTeam onClose={() => setIsJoinTeamModalOpen(false)} />}
       </div>
     </div>
   );
