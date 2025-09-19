@@ -36,6 +36,7 @@ const navConfig = {
     { name: 'Resources', path: '/rescue/resources', icon: <BsCollection className="mr-2" /> },
   ],
   user: [
+    { name: 'UserDashboard', path: '/dashboard', icon: <BsFileEarmarkText className="mr-2" /> },
     { name: 'Report', path: '/report', icon: <BsFileEarmarkText className="mr-2" /> },
     { name: 'Alerts', path: '/alerts', icon: <BsExclamationTriangle className="mr-2" /> },
     { name: 'Help Status', path: '/citizen', icon: <BsClipboardData className="mr-2" /> }
