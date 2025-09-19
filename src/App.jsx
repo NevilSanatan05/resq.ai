@@ -25,6 +25,7 @@ import Teams from './pages/Teams';
 import MyTeams from './pages/MyTeams';
 import CreateTeam from './pages/CreateTeam';
 import TeamAnalytics from './pages/TeamAnalytics';
+import About from './pages/About';
 
 // A wrapper to handle authentication redirects
 const AuthWrapper = ({ children }) => {
@@ -134,6 +135,8 @@ function App() {
 
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
+
+                <Route path="/about" element={<About />} />
               </Routes>
               </div>
               <Footer />
