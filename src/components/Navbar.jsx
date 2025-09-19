@@ -26,13 +26,13 @@ const navConfig = {
   admin: [
     { name: 'Dashboard', path: '/admin-dashboard', icon: <BsHouse className="mr-2" /> },
     { name: 'Users', path: '/admin/users', icon: <BsPeople className="mr-2" /> },
-    { name: 'Reports', path: '/admin/reports', icon: <BsClipboardData className="mr-2" /> },
-    { name: 'Analytics', path: '/admin/analytics', icon: <BsGraphUp className="mr-2" /> },
+    { name: 'Reports', path: '/reports', icon: <BsClipboardData className="mr-2" /> },
+    { name: 'Analytics', path: '/analytics', icon: <BsGraphUp className="mr-2" /> },
   ],
   rescue: [
     { name: 'Dashboard', path: '/rescue-dashboard', icon: <BsHouse className="mr-2" /> },
     { name: 'Alerts', path: '/rescue/alerts', icon: <BsExclamationTriangle className="mr-2" /> },
-    { name: 'Map', path: '/rescue/map', icon: <BsMap className="mr-2" /> },
+    { name: 'Map', path: '/user/map', icon: <BsMap className="mr-2" /> }, // Updated path
     { name: 'Resources', path: '/rescue/resources', icon: <BsCollection className="mr-2" /> },
   ],
   user: [
@@ -406,7 +406,7 @@ function Navbar() {
             {isRescue && (
               <Link
                 to="/rescue-dashboard"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
                 Rescue Dashboard
@@ -417,14 +417,14 @@ function Navbar() {
               <>
                 <Link
                   to="/report"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Report Incident
                 </Link>
                 <Link
                   to="/alerts"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Emergency Alerts
@@ -456,7 +456,7 @@ function Navbar() {
                 </Link>
                 <Link
                   to="/settings"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Settings
@@ -511,14 +511,14 @@ function Navbar() {
           </Link>
           <Link
             to="/citizen"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             Citizen
           </Link>
           <Link
             to="/rescue"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             Rescue
@@ -549,7 +549,7 @@ function Navbar() {
           </Link>
           <Link
             to="/admin/users"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">
@@ -558,7 +558,7 @@ function Navbar() {
           </Link>
           <Link
             to="/admin/reports"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">
@@ -566,8 +566,8 @@ function Navbar() {
             </div>
           </Link>
           <Link
-            to="/admin/analytics"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            to="/analytics"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">

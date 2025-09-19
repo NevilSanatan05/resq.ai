@@ -21,6 +21,7 @@ import NotFound from './pages/NotFound';
 import ToastTest from './components/ToastTest';
 import Contact from './pages/Contact';
 import About from './pages/About';
+import Map from './pages/user/Map';
 
 // Team Management Pages
 import Teams from './pages/Teams';
@@ -129,6 +130,8 @@ function App() {
                       <Teams />
                     </ProtectedRoute>
                   } />
+
+                  <Route path="/user/map" element={<Map />} />
 
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />
