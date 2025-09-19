@@ -1,6 +1,13 @@
-// src/components/Dashboard.jsx
 import { useState, useEffect } from "react";
 import { MapPin } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import axios from "axios";
+
+import ReportModal from "../components/ReportModal";
+import RequestJoinTeam from "../components/RequestJoinTeam";
+
+const API_URL = "http://localhost:5000/api";
 
 export default function DisasterDashboard() {
   const [activeTab, setActiveTab] = useState("alerts");
@@ -10,9 +17,15 @@ export default function DisasterDashboard() {
   const [error, setError] = useState(null);
   const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
 
-  // ✅ Fetch weather using supplied coordinates
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isJoinTeamModalOpen, setIsJoinTeamModalOpen] = useState(false);
+
+  const { currentUser } = useAuth();
+  const { showToast } = useToast();
+
+  // Fetch weather using supplied coordinates
   const fetchWeatherFromServer = async (lat, lon) => {
-    if (lat === null || lon === null) return;
+    if (lat == null || lon == null) return;
 
     try {
       setLoading(true);
@@ -39,7 +52,21 @@ export default function DisasterDashboard() {
     }
   };
 
-  // ✅ Get user coordinates on mount
+  // Submit report
+  const handleReportSubmit = async (reportData) => {
+    try {
+      await axios.post(`${API_URL}/reports`, reportData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      showToast("Report submitted successfully", "success");
+      setIsReportModalOpen(false);
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || "Failed to submit report", "error");
+    }
+  };
+
+  // Get user coordinates on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -50,7 +77,7 @@ export default function DisasterDashboard() {
         },
         (err) => {
           console.warn("Geolocation error:", err.message);
-          const fallback = { lat: 20.2961, lon: 85.8245 }; // fallback
+          const fallback = { lat: 20.2961, lon: 85.8245 }; // fallback: Bhubaneswar
           setCoordinates(fallback);
           fetchWeatherFromServer(fallback.lat, fallback.lon);
         }
@@ -65,15 +92,17 @@ export default function DisasterDashboard() {
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
+        {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="w-6 h-6 text-blue-400" />
           <h1 className="text-2xl font-bold text-white">Disaster Dashboard</h1>
         </div>
 
         {/* Show coordinates */}
-        {coordinates.lat && coordinates.lon && (
+        {coordinates.lat != null && coordinates.lon != null && (
           <p className="text-gray-300 mb-4">
-            🌍 Your Coordinates: Latitude {coordinates.lat.toFixed(4)}, Longitude {coordinates.lon.toFixed(4)}
+            🌍 Your Coordinates: Latitude {coordinates.lat.toFixed(4)}, Longitude{" "}
+            {coordinates.lon.toFixed(4)}
           </p>
         )}
 
@@ -81,7 +110,7 @@ export default function DisasterDashboard() {
         {activeTab === "alerts" && (
           <div className="space-y-4">
             {loading && <p className="text-gray-400">Fetching live weather data...</p>}
-            {error && <p className="text-red-400">⚠️ Error: {error}</p>}
+            {error && <p className="text-red-400">⚠ Error: {error}</p>}
             {!loading && weather && (
               <div className="bg-gray-800 p-4 rounded-xl">
                 <h3 className="text-sm font-medium text-gray-400 mb-2">
@@ -106,6 +135,17 @@ export default function DisasterDashboard() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Modals */}
+        {isReportModalOpen && (
+          <ReportModal
+            onClose={() => setIsReportModalOpen(false)}
+            onSubmit={handleReportSubmit}
+          />
+        )}
+        {isJoinTeamModalOpen && (
+          <RequestJoinTeam onClose={() => setIsJoinTeamModalOpen(false)} />
         )}
       </div>
     </div>

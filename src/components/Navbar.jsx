@@ -27,17 +27,19 @@ const navConfig = {
     { name: 'Dashboard', path: '/admin-dashboard', icon: <BsHouse className="mr-2" /> },
     { name: 'Users', path: '/admin/users', icon: <BsPeople className="mr-2" /> },
     { name: 'Reports', path: '/admin/reports', icon: <BsClipboardData className="mr-2" /> },
-    { name: 'Analytics', path: '/admin/analytics', icon: <BsGraphUp className="mr-2" /> },
+    { name: 'Map', path: '/user/map', icon: <BsMap className="mr-2" /> },
+    { name: 'Analytics', path: '/analytics', icon: <BsGraphUp className="mr-2" /> },
   ],
   rescue: [
     { name: 'Dashboard', path: '/rescue-dashboard', icon: <BsHouse className="mr-2" /> },
     { name: 'Alerts', path: '/rescue/alerts', icon: <BsExclamationTriangle className="mr-2" /> },
-    { name: 'Map', path: '/rescue/map', icon: <BsMap className="mr-2" /> },
+    { name: 'Map', path: '/user/map', icon: <BsMap className="mr-2" /> }, // Updated path
     { name: 'Resources', path: '/rescue/resources', icon: <BsCollection className="mr-2" /> },
   ],
   user: [
     { name: 'UserDashboard', path: '/dashboard', icon: <BsFileEarmarkText className="mr-2" /> },
     { name: 'Report', path: '/report', icon: <BsFileEarmarkText className="mr-2" /> },
+    { name: 'Map', path: '/user/map', icon: <BsMap className="mr-2" /> },
     { name: 'Alerts', path: '/alerts', icon: <BsExclamationTriangle className="mr-2" /> },
     { name: 'Help Status', path: '/citizen', icon: <BsClipboardData className="mr-2" /> }
   ]
@@ -90,6 +92,7 @@ function Navbar() {
     ...(isAdmin ? [{ name: 'Admin Settings', path: '/admin/settings', icon: <BsShieldCheck className="mr-2" /> }] : []),
     { name: 'Sign out', action: handleLogout, icon: <BsBoxArrowRight className="mr-2" /> }
   ];
+  
 
   // Get navigation items based on role
   const getNavItems = () => {
@@ -378,14 +381,14 @@ function Navbar() {
       <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
         <Link
           to="/"
-          className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+          className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
           onClick={() => setIsOpen(false)}
         >
           Home
         </Link>
         <Link
           to="/citizen"
-          className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+          className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
           onClick={() => setIsOpen(false)}
         >
           Citizen
@@ -396,7 +399,7 @@ function Navbar() {
             {isAdmin && (
               <Link
                 to="/admin-dashboard"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
                 Admin Dashboard
@@ -406,7 +409,7 @@ function Navbar() {
             {isRescue && (
               <Link
                 to="/rescue-dashboard"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
                 Rescue Dashboard
@@ -417,14 +420,14 @@ function Navbar() {
               <>
                 <Link
                   to="/report"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Report Incident
                 </Link>
                 <Link
                   to="/alerts"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Emergency Alerts
@@ -449,14 +452,14 @@ function Navbar() {
               <div className="mt-3 px-2 space-y-1">
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Your Profile
                 </Link>
                 <Link
                   to="/settings"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  className="block px-3 py-2 rounded-md textBase font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Settings
@@ -466,7 +469,7 @@ function Navbar() {
                     handleLogout();
                     setIsOpen(false);
                   }}
-                  className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-white hover:bg-gray-700"
+                  className="w-full text-left block px-3 py-2 rounded-md textBase font-medium text-red-400 hover:text-white hover:bg-gray-700"
                 >
                   Sign out
                 </button>
@@ -504,21 +507,21 @@ function Navbar() {
         <>
           <Link
             to="/"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             Home
           </Link>
           <Link
             to="/citizen"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             Citizen
           </Link>
           <Link
             to="/rescue"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             Rescue
@@ -540,7 +543,7 @@ function Navbar() {
           </div>
           <Link
             to="/admin/dashboard"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 bg-teal-900/30"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700 bg-teal-900/30"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">
@@ -549,7 +552,7 @@ function Navbar() {
           </Link>
           <Link
             to="/admin/users"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">
@@ -558,7 +561,7 @@ function Navbar() {
           </Link>
           <Link
             to="/admin/reports"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">
@@ -566,8 +569,8 @@ function Navbar() {
             </div>
           </Link>
           <Link
-            to="/admin/analytics"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700"
+            to="/analytics"
+            className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
             <div className="flex items-center">

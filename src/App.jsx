@@ -15,12 +15,15 @@ import Citizen from './pages/Citizen';
 import RescueDashboard from './pages/RescueDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
+import Report from './pages/Report';
+import AdminReport from './pages/AdminReport';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import ToastTest from './components/ToastTest';
 import Contact from './pages/Contact';
 import About from './pages/About';
+import Map from './pages/user/Map';
 
 // Team Management Pages
 import Teams from './pages/Teams';
@@ -68,6 +71,13 @@ function App() {
                     </ProtectedRoute>
                   } />
                   
+                  {/* Protected User Report Route */}
+                  <Route path="/report" element={
+                    <ProtectedRoute>
+                      <Report />
+                    </ProtectedRoute>
+                  } />
+                  
                   {/* Auth Routes */}
                   <Route path="/login" element={
                     <AuthWrapper>
@@ -84,6 +94,18 @@ function App() {
                   <Route path="/dashboard" element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/admin-dashboard" element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/admin/reports" element={
+                    <ProtectedRoute>
+                      <AdminReport />
                     </ProtectedRoute>
                   } />
 
@@ -129,6 +151,8 @@ function App() {
                       <Teams />
                     </ProtectedRoute>
                   } />
+
+                  <Route path="/user/map" element={<Map />} />
 
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />

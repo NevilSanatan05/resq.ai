@@ -156,11 +156,21 @@ const AdminDashboard = () => {
   const { showToast } = useToast();
   const [incidents, setIncidents] = useState([]);
   const [incidentsLoading, setIncidentsLoading] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
   const [teams, setTeams] = useState([]);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignIncidentId, setAssignIncidentId] = useState(null);
   const [assignTeamId, setAssignTeamId] = useState('');
   const [assignEta, setAssignEta] = useState('30');
+  const [reportAssignModalOpen, setReportAssignModalOpen] = useState(false);
+  const [assignReportId, setAssignReportId] = useState(null);
+  const [reportAssignTeamId, setReportAssignTeamId] = useState('');
+  const [reportAssignEta, setReportAssignEta] = useState('30');
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusReportId, setStatusReportId] = useState(null);
+  const [updateStatusValue, setUpdateStatusValue] = useState('pending');
+  const [resolutionNotes, setResolutionNotes] = useState('');
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelIncidentId, setCancelIncidentId] = useState(null);
   const [cancelReason, setCancelReason] = useState('No teams available');
@@ -281,9 +291,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchReports = async () => {
+    try {
+      setReportsLoading(true);
+      const res = await axios.get(`${API_URL}/reports`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setReports(res.data?.data?.reports || []);
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to load reports', 'error');
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchIncidents();
     fetchTeams();
+    fetchReports();
   }, []);
 
   const openAssignModal = (incidentId) => {
@@ -295,6 +319,17 @@ const AdminDashboard = () => {
     setAssignTeamId(teams[0]?._id || '');
     setAssignEta('30');
     setAssignModalOpen(true);
+  };
+
+  const openReportAssignModal = (reportId) => {
+    if (teams.length === 0) {
+      showToast('No teams found. Create a team to assign this report.', 'error');
+      return;
+    }
+    setAssignReportId(reportId);
+    setReportAssignTeamId(teams[0]?._id || '');
+    setReportAssignEta('30');
+    setReportAssignModalOpen(true);
   };
 
   const submitAssign = async () => {
@@ -309,6 +344,43 @@ const AdminDashboard = () => {
     } catch (e) {
       console.error(e);
       showToast(e.response?.data?.message || 'Failed to assign incident', 'error');
+    }
+  };
+
+  const submitReportAssign = async () => {
+    try {
+      await axios.post(`${API_URL}/reports/${assignReportId}/assign`, {
+        teamId: reportAssignTeamId,
+        etaMinutes: reportAssignEta ? parseInt(reportAssignEta, 10) : undefined
+      }, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setReportAssignModalOpen(false);
+      showToast('Report assigned to team', 'success');
+      fetchReports();
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || 'Failed to assign report', 'error');
+    }
+  };
+
+  const openStatusModal = (reportId, currentStatus) => {
+    setStatusReportId(reportId);
+    setUpdateStatusValue(currentStatus || 'pending');
+    setResolutionNotes('');
+    setStatusModalOpen(true);
+  };
+
+  const submitUpdateStatus = async () => {
+    try {
+      await axios.patch(`${API_URL}/reports/${statusReportId}/status`, {
+        status: updateStatusValue,
+        resolutionNotes: resolutionNotes || undefined
+      }, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      setStatusModalOpen(false);
+      showToast('Report status updated', 'success');
+      fetchReports();
+    } catch (e) {
+      console.error(e);
+      showToast(e.response?.data?.message || 'Failed to update status', 'error');
     }
   };
 
@@ -662,6 +734,71 @@ const AdminDashboard = () => {
             </ChartCard>
           </div>
 
+          {/* Reports Management */}
+          <div className="mt-8">
+            <ChartCard title="User Reports Management">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">All Reports</h3>
+                <button onClick={fetchReports} className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded">Refresh</button>
+              </div>
+              {reportsLoading ? (
+                <div className="p-6 text-center text-gray-500">Loading reports...</div>
+              ) : reports.length === 0 ? (
+                <div className="p-6 text-center text-gray-500">No reports submitted yet</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reporter</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Urgency</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">People</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {reports.map((rep) => (
+                        <tr key={rep._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{rep.user?.name || rep.user?.email || 'User'}</div>
+                            <div className="text-xs text-gray-500">{rep.user?.email || ''}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {rep.disasterType} • {rep.disasterSubType}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{rep.location}</div>
+                            <div className="text-xs text-gray-500">{rep.pincode}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{rep.urgency}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{rep.peopleAffected || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{rep.status}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {rep.assignedTeam?.name ? `${rep.assignedTeam.name}${rep.etaMinutes ? ` • ${rep.etaMinutes}m` : ''}` : '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(rep.createdAt).toLocaleString()}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex gap-2">
+                              <button onClick={() => openReportAssignModal(rep._id)} className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
+                              <button onClick={() => openStatusModal(rep._id, rep.status)} className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">Update Status</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </ChartCard>
+          </div>
+
           {/* Rescue Teams Status */}
           <div className="mt-8">
             <ChartCard title="Rescue Teams Status">
@@ -722,7 +859,7 @@ const AdminDashboard = () => {
                             <div className="text-sm text-gray-900">{team.location}</div>
                             <div className="text-xs text-gray-500">{team.state}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <div className="flex gap-2">
                               <button
                                 onClick={() => window.location.href = `/teams/${team.id}`}
@@ -802,6 +939,80 @@ const AdminDashboard = () => {
               )}
             </ChartCard>
           </div>
+
+          {/* Report Assign Modal */}
+          {reportAssignModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Assign Report to Team</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Select Team</label>
+                    <select
+                      value={reportAssignTeamId}
+                      onChange={(e) => setReportAssignTeamId(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    >
+                      {teams.map(team => (
+                        <option key={team._id} value={team._id}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">ETA (minutes)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={reportAssignEta}
+                      onChange={(e) => setReportAssignEta(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button onClick={() => setReportAssignModalOpen(false)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
+                  <button onClick={submitReportAssign} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Assign</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Update Status Modal */}
+          {statusModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Update Report Status</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Status</label>
+                    <select
+                      value={updateStatusValue}
+                      onChange={(e) => setUpdateStatusValue(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="live">Live</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">Resolution Notes (optional)</label>
+                    <textarea
+                      rows="3"
+                      value={resolutionNotes}
+                      onChange={(e) => setResolutionNotes(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button onClick={() => setStatusModalOpen(false)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
+                  <button onClick={submitUpdateStatus} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">Update</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Assign Modal */}
           {assignModalOpen && (
