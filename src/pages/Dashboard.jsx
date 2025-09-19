@@ -23,7 +23,7 @@ export default function DisasterDashboard() {
 
   const tabs = [
     { id: "overview", label: "Overview", icon: <BsBarChart /> },
-    { id: "resources", label: "Resources", icon: <BsFileEarmarkText /> },
+    // { id: "resources", label: "Resources", icon: <BsFileEarmarkText /> },
     { id: "map", label: "Live Map", icon: <BsGeoAlt /> },
     { id: "alerts", label: "Alerts", icon: <BsExclamationTriangle /> },
     { id: "community", label: "Community", icon: <BsPeople /> },
@@ -97,66 +97,84 @@ export default function DisasterDashboard() {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Area */}
         <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg">
-          {selectedTab === "overview" && (
-            <>
-              <h2 className="text-lg font-semibold mb-4 flex items-center">
-                <BsBarChart className="mr-2" /> Disaster Forecast & Analytics
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-800 p-4 rounded-xl">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Active Incidents</h3>
-                  <p className="text-2xl font-bold text-white">24</p>
-                  <p className="text-xs text-green-400 mt-1">↑ 12% from last week</p>
-                </div>
-                
-                <div className="bg-gray-800 p-4 rounded-xl">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">People Affected</h3>
-                  <p className="text-2xl font-bold text-white">1,240</p>
-                  <p className="text-xs text-red-400 mt-1">↑ 8% from last week</p>
-                </div>
-                
-                <div className="bg-gray-800 p-4 rounded-xl">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Resources Deployed</h3>
-                  <p className="text-2xl font-bold text-white">85%</p>
-                  <p className="text-xs text-yellow-400 mt-1">↓ 5% capacity remaining</p>
-                </div>
-                
-                <div className="bg-gray-800 p-4 rounded-xl">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Response Time</h3>
-                  <p className="text-2xl font-bold text-white">18 min</p>
-                  <p className="text-xs text-green-400 mt-1">↓ 22% improvement</p>
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 p-4 rounded-xl mb-4">
-                <h3 className="text-sm font-medium text-gray-400 mb-2">Upcoming Weather Alerts</h3>
-                <p className="text-white">Cyclone approaching Odisha coast - high risk zone. Relief teams are being mobilized.</p>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Updated 20 minutes ago</span>
-                  <button className="text-xs text-teal-400 hover:underline">View Details</button>
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 p-4 rounded-xl">
-                <h3 className="text-sm font-medium text-gray-400 mb-2">Recent Activity</h3>
-                <ul className="space-y-2">
-                  <li className="text-sm text-white flex justify-between">
-                    <span>New evacuation route added</span>
-                    <span className="text-gray-400">2h ago</span>
-                  </li>
-                  <li className="text-sm text-white flex justify-between">
-                    <span>Resource allocation updated</span>
-                    <span className="text-gray-400">4h ago</span>
-                  </li>
-                  <li className="text-sm text-white flex justify-between">
-                    <span>Alert notification sent</span>
-                    <span className="text-gray-400">6h ago</span>
-                  </li>
-                </ul>
-              </div>
-            </>
-          )}
+         {selectedTab === "overview" && (
+  <>
+    <h2 className="text-lg font-semibold mb-4 flex items-center">
+      <BsBarChart className="mr-2" /> Disaster Forecast & Analytics
+    </h2>
+
+    {/* Stats Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {[
+        {
+          title: "Active Incidents",
+          value: "24",
+          trend: "↑ 12% from last week",
+          trendColor: "text-green-400",
+        },
+        {
+          title: "People Affected",
+          value: "1,240",
+          trend: "↑ 8% from last week",
+          trendColor: "text-red-400",
+        },
+        {
+          title: "Resources Deployed",
+          value: "85%",
+          trend: "↓ 5% capacity remaining",
+          trendColor: "text-yellow-400",
+        },
+        {
+          title: "Response Time",
+          value: "18 min",
+          trend: "↓ 22% improvement",
+          trendColor: "text-green-400",
+        },
+      ].map((card, i) => (
+        <div key={i} className="bg-gray-800 p-4 rounded-xl">
+          <h3 className="text-sm font-medium text-gray-400 mb-2">{card.title}</h3>
+          <p className="text-2xl font-bold text-white">{card.value}</p>
+          <p className={`text-xs mt-1 ${card.trendColor}`}>{card.trend}</p>
+        </div>
+      ))}
+    </div>
+
+    {/* Alerts */}
+    <div className="bg-gray-800 p-4 rounded-xl mb-4">
+      <h3 className="text-sm font-medium text-gray-400 mb-2">Upcoming Weather Alerts</h3>
+      <p className="text-white">
+        Cyclone approaching Odisha coast – high risk zone. Relief teams are being mobilized.
+      </p>
+      <div className="mt-2 flex justify-between items-center">
+        <span className="text-xs text-gray-400">Updated 20 minutes ago</span>
+        <button className="text-xs text-teal-400 hover:underline">View Details</button>
+      </div>
+    </div>
+
+    {/* Recent Activity */}
+    <div className="bg-gray-800 p-4 rounded-xl">
+      <h3 className="text-sm font-medium text-gray-400 mb-2">Recent Activity</h3>
+      <ul className="space-y-2">
+        {[
+          { text: "New evacuation route added", time: "2h ago" },
+          { text: "Resource allocation updated", time: "4h ago" },
+          { text: "Alert notification sent", time: "6h ago" },
+          { text: "Rescue team reached Bhubaneswar", time: "7h ago" },
+          { text: "Flood alert extended in Assam", time: "10h ago" },
+        ].map((activity, i) => (
+          <li
+            key={i}
+            className="text-sm text-white flex justify-between"
+          >
+            <span>{activity.text}</span>
+            <span className="text-gray-400">{activity.time}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </>
+)}
+
 
           {selectedTab === "resources" && (
             <>
