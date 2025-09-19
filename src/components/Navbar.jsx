@@ -26,7 +26,7 @@ const navConfig = {
   admin: [
     { name: 'Dashboard', path: '/admin-dashboard', icon: <BsHouse className="mr-2" /> },
     { name: 'Users', path: '/admin/users', icon: <BsPeople className="mr-2" /> },
-    { name: 'Reports', path: '/reports', icon: <BsClipboardData className="mr-2" /> },
+    { name: 'Report', path: '/report', icon: <BsClipboardData className="mr-2" /> },
     { name: 'Analytics', path: '/analytics', icon: <BsGraphUp className="mr-2" /> },
   ],
   rescue: [
@@ -557,7 +557,7 @@ function Navbar() {
             </div>
           </Link>
           <Link
-            to="/admin/reports"
+            to="/pages/report"
             className="block px-3 py-2 rounded-md textBase font-medium text-gray-300 hover:bg-gray-700"
             onClick={() => setIsOpen(false)}
           >
