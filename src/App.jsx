@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import ToastTest from './components/ToastTest';
+import About from './pages/About';
 
 // Team Management Pages
 import Teams from './pages/Teams';
@@ -55,6 +56,7 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/test-toast" element={<ToastTest />} />
                 
                 {/* Protected Citizen Route */}
