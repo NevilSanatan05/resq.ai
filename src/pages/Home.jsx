@@ -36,7 +36,7 @@ const Home = () => {
           className="mt-6 text-gray-300 text-lg max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 4, ease: "easeOut" }} // Appears after heading
+          transition={{ duration: 1, delay: 2, ease: "easeOut" }} // Appears after heading
         >
           AI-powered disaster response platform helping citizens send SOS, rescue teams manage missions, 
           and administrators coordinate relief efforts in real-time.
