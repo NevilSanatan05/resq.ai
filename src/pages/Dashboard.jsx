@@ -201,20 +201,20 @@ export default function DisasterDashboard() {
             onChange={(e) => setLanguage(e.target.value)}
             className="bg-gray-800 text-white p-2 rounded"
           >
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-            <option value="bn">Bengali</option>
-            <option value="te">Telugu</option>
-            <option value="mr">Marathi</option>
-            <option value="ta">Tamil</option>
-            <option value="ur">Urdu</option>
-            <option value="gu">Gujarati</option>
-            <option value="kn">Kannada</option>
-            <option value="ml">Malayalam</option>
-            <option value="or">Odia</option>
-            <option value="pa">Punjabi</option>
-            <option value="as">Assamese</option>
-            <option value="fr">French</option>
+           <option value="en">English</option>
+<option value="hi">हिन्दी</option>
+<option value="bn">বাংলা</option>
+<option value="te">తెలుగు</option>
+<option value="mr">मराठी</option>
+<option value="ta">தமிழ்</option>
+<option value="ur">اردو</option>
+<option value="gu">ગુજરાતી</option>
+<option value="kn">ಕನ್ನಡ</option>
+<option value="ml">മലയാളം</option>
+<option value="or">ଓଡ଼ିଆ</option>
+<option value="pa">ਪੰਜਾਬੀ</option>
+<option value="as">অসমীয়া</option>
+<option value="fr">Français</option>
           </select>
         </div>
 
