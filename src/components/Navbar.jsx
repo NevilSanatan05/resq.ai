@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -20,6 +21,9 @@ import {
   BsList,
   BsX
 } from 'react-icons/bs';
+import { FaBell } from 'react-icons/fa';
+
+const API_URL = 'http://localhost:5000/api';
 
 // Role-based navigation configuration
 const navConfig = {
@@ -49,6 +53,8 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const { currentUser, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -84,6 +90,27 @@ function Navbar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Fetch notifications (auth scoped) + polling every 60s
+  useEffect(() => {
+    let intervalId;
+    const fetchNotifs = async () => {
+      try {
+        if (!currentUser) return;
+        const res = await axios.get(`${API_URL}/notifications`);
+        // Support both {success, items} and raw array fallback
+        const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+        setNotifications(items);
+      } catch (e) {
+        // silent fail in navbar
+      }
+    };
+
+    fetchNotifs();
+    intervalId = setInterval(fetchNotifs, 60000);
+
+    return () => intervalId && clearInterval(intervalId);
+  }, [currentUser]);
 
   // User navigation items
   const userNavigation = [
@@ -284,14 +311,54 @@ function Navbar() {
             {isAuthenticated ? (
               <div className="ml-4 flex items-center md:ml-6">
                 {/* Notifications */}
-                <button
-                  onClick={() => navigate('/notifications')}
-                  className="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none relative"
-                >
-                  <span className="sr-only">View notifications</span>
-                  <BsBell className="h-6 w-6" />
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
-                </button>
+                <div style={{ position: 'relative', marginRight: 24 }}>
+                  <FaBell
+                    size={24}
+                    style={{ color: '#FFD700', cursor: 'pointer' }}
+                    onClick={() => setShowDropdown(!showDropdown)}
+                  />
+                  {notifications.length > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -4,
+                      background: 'red',
+                      color: 'white',
+                      borderRadius: '50%',
+                      padding: '2px 6px',
+                      fontSize: 12,
+                      fontWeight: 'bold'
+                    }}>
+                      {notifications.length}
+                    </span>
+                  )}
+                  {showDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 32,
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      borderRadius: 8,
+                      minWidth: 250,
+                      zIndex: 1000
+                    }}>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: 16, color: '#888' }}>No notifications</div>
+                      ) : (
+                        notifications.map((n, idx) => (
+                          <div key={idx} style={{
+                            padding: 12,
+                            borderBottom: idx < notifications.length - 1 ? '1px solid #eee' : 'none',
+                            color: n.risk === 'high' ? 'red' : n.risk === 'medium' ? '#FFA500' : '#333'
+                          }}>
+                            {n.message}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Profile dropdown */}
                 <div className="ml-3 relative" ref={dropdownRef}>

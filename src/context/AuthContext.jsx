@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
@@ -17,6 +17,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const hasPredictedRef = useRef(false);
 
   // Set auth token in axios headers
   const setAuthToken = (token) => {
@@ -68,6 +70,9 @@ export const AuthProvider = ({ children }) => {
       
       // Show success toast
       showToast(`Welcome back, ${data.user.name || 'User'}!`, 'success');
+
+      // Trigger flood risk prediction after login (non-blocking)
+      requestLocationAndPredict();
       
       // Redirect based on role
       if (data.user.role === 'admin') {
@@ -105,6 +110,8 @@ export const AuthProvider = ({ children }) => {
       setAuthToken(token);
       const response = await axios.get(`${API_URL}/auth/me`);
       setCurrentUser(response.data.data.user);
+      // Trigger prediction on initial auth check if not yet run
+      requestLocationAndPredict();
       return true;
     } catch (err) {
       setAuthToken(null);
@@ -119,8 +126,43 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Get the toast function
-  const { showToast } = useToast();
+  // Request geolocation and call flood risk API (runs once per session)
+  const requestLocationAndPredict = () => {
+    try {
+      if (hasPredictedRef.current) return;
+      if (!currentUser) return;
+      if (!navigator.geolocation) {
+        return; // silently skip on unsupported
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            await axios.post('/api/risk/flood', { lat, lon });
+            // We rely on Navbar polling to display the persisted notification.
+            // Also show a toast immediately for better UX by fetching risk result.
+            // Make a second call to get response for toast (alternatively, use the same response if backend exposes CORS to API_URL)
+            const res = await axios.post('/api/risk/flood', { lat, lon });
+            const data = res?.data?.data || {};
+            const level = data.riskLevel || 'info';
+            const typeMap = { low: 'info', medium: 'warning', high: 'error' };
+            const toastType = typeMap[level] || 'info';
+            const msg = data.message || 'Flood risk updated for your location';
+            showToast(msg, toastType);
+            hasPredictedRef.current = true;
+          } catch (e) {
+            // Optional silent failure
+          }
+        },
+        () => {
+          // user denied location; skip silently to avoid annoyance
+        }
+      );
+    } catch (e) {
+      // ignore
+    }
+  };
 
   const value = {
     currentUser,
