@@ -1,37 +1,66 @@
+import React from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { motion } from "framer-motion";
 
-function Home() {
-  const [openChat, setOpenChat] = useState(false);
-  const [donationAmount, setDonationAmount] = useState(100);
-
+const Home = () => {
   return (
     <div className="space-y-16 relative">
       {/* Hero Section */}
       <section className="text-center py-16 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-xl shadow-lg">
-        <h1 className="text-5xl font-extrabold text-teal-400">ResQ.AI</h1>
-        <p className="mt-4 text-gray-300 text-lg max-w-2xl mx-auto">
+        {/* Animated Heading - Split */}
+        <motion.h1
+          className="text-5xl font-extrabold text-teal-400"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2 }}
+        >
+          ResQ.AI
+        </motion.h1>
+
+        <motion.h2
+  className="text-3xl font-semibold text-gray-300 mt-4"
+  animate={{ opacity: [1, 1, 1] }}
+  transition={{
+    duration: 2,
+    repeat: Infinity,
+    repeatType: "mirror",
+    delay: 1, // start 1 second after main heading
+    ease: "easeInOut",
+  }}
+>
+  Your Safety, Our Priority
+</motion.h2>
+
+        {/* Animated Paragraph */}
+        <motion.p
+          className="mt-6 text-gray-300 text-lg max-w-2xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 4, ease: "easeOut" }} // Appears after heading
+        >
           AI-powered disaster response platform helping citizens send SOS, rescue teams manage missions, 
           and administrators coordinate relief efforts in real-time.
-        </p>
+        </motion.p>
+
+        {/* Buttons */}
         <div className="mt-6 space-x-4">
           <Link
             to="/citizen"
             className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
           >
-            🚨 Send SOS
+            Send SOS
           </Link>
           <Link
             to="/rescue-dashboard"
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
           >
-            🛟 Rescue Dashboard
+            Rescue Dashboard
           </Link>
           <Link
             to="/admin-dashboard"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
           >
-            🖥️ Admin Panel
+            Admin Panel
           </Link>
         </div>
       </section>
@@ -49,18 +78,18 @@ function Home() {
           <div className="bg-gray-800 p-6 rounded-xl shadow hover:shadow-xl transition">
             <h3 className="text-xl font-semibold text-green-400">Rescue Team</h3>
             <p className="text-gray-300 mt-2">
-              View incoming SOS requests, accept missions, and update rescue status in real time.
+              Coordinate rescue missions and track teams in real-time.
             </p>
           </div>
           <div className="bg-gray-800 p-6 rounded-xl shadow hover:shadow-xl transition">
-            <h3 className="text-xl font-semibold text-blue-400">Admin Dashboard</h3>
+            <h3 className="text-xl font-semibold text-blue-400">Admin Panel</h3>
             <p className="text-gray-300 mt-2">
-              Monitor all activities, assign missions, and manage teams dynamically with one interface.
+              Monitor overall operations, reports, and emergency management dashboards.
             </p>
           </div>
         </div>
       </section>
-
+      
       {/* How It Works Section */}
       <section className="max-w-5xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-teal-400">How It Works</h2>
@@ -135,7 +164,7 @@ function Home() {
               <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-lg font-semibold text-sm">32+ Casualties</div>
               <div className="h-52 bg-gray-700 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://imgs.search.brave.com/7QEz-Mu9SYxZgKBM6Ed4qq6X4Bq511dcHQdd60oCEc0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5hc3NldHR5cGUu/Y29tL291dGxvb2tp/bmRpYS8yMDI1LTA4/LTI4L2ozYTdiaTJj/L0FQMjUyMzg1Njgz/NzAxMzkuanBnP3c9/ODAxJmF1dG89Zm9y/bWF0LGNvbXByZXNz/JmZpdD1tYXgmZm9y/bWF0PXdlYnAmZHBy/PTEuMA" 
+                  src="https://media.assettype.com/outlookindia/2025-08-28/j3a7b1j2c/AP25238568370139.jpg?w=801&auto=format,compress&fit=max&format=webp&dpr=1.0" 
                   alt="Kashmir Floods" 
                   className="w-full h-full object-cover hover:scale-110 transition duration-700"
                   onError={(e) => {
@@ -170,7 +199,7 @@ function Home() {
               <div className="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-lg font-semibold text-sm">420+ Lives Lost</div>
               <div className="h-52 bg-gray-700 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://imgs.search.brave.com/XphVOr1r9jsFKQ0ZFXvG9TYGtAt-6_7WGokhqMJHSo4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5hc3NldHR5cGUu/Y29tL25ld2luZGlh/bmV4cHJlc3MvMjAy/NC0wNy0zMS83M3Fm/eHdwMS9OZXclMjBQ/cm9qZWN0JTIwKDQw/KS5qcGc_cmVjdD0w/LDExNywxMjAwLDY3/NSZ3PTQ4MCZhdXRv/PWZvcm1hdCxjb21w/cmVzcyZmaXQ9bWF4" 
+                  src="https://media.assettype.com/newindianexpress/2024-07-31/73qfxwp1/New_Project_40_.jpg?rect=0,117,1200,675&w=480&auto=format,compress&fit=max" 
                   alt="Wayanad Landslides" 
                   className="w-full h-full object-cover hover:scale-110 transition duration-700"
                   onError={(e) => {
@@ -496,204 +525,49 @@ function Home() {
                 Your donation helps us improve our platform and reach more communities in need. Every contribution makes a difference in disaster response efforts.
               </p>
               
-              <div className="space-y-6">
+              {/* Donation Form Content (placeholder) */}
+              <form className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Select Amount</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                    <button 
-                      className={`px-4 py-3 rounded-lg transition-all duration-200 ${donationAmount === 100 ? 'bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-2 ring-offset-gray-900' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      onClick={() => setDonationAmount(100)}
-                    >
-                      ₹100
-                    </button>
-                    <button 
-                      className={`px-4 py-3 rounded-lg transition-all duration-200 ${donationAmount === 500 ? 'bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-2 ring-offset-gray-900' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      onClick={() => setDonationAmount(500)}
-                    >
-                      ₹500
-                    </button>
-                    <button 
-                      className={`px-4 py-3 rounded-lg transition-all duration-200 ${donationAmount === 1000 ? 'bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-2 ring-offset-gray-900' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      onClick={() => setDonationAmount(1000)}
-                    >
-                      ₹1,000
-                    </button>
-                    <button 
-                      className={`px-4 py-3 rounded-lg transition-all duration-200 ${donationAmount === 5000 ? 'bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-2 ring-offset-gray-900' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      onClick={() => setDonationAmount(5000)}
-                    >
-                      ₹5,000
-                    </button>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-400">₹</span>
-                    </div>
-                    <input 
-                      type="number" 
-                      className="pl-8 pr-4 py-3 rounded-lg bg-gray-700 text-white w-full focus:ring-2 focus:ring-teal-400 focus:outline-none"
-                      placeholder="Custom amount"
-                      onChange={(e) => setDonationAmount(parseInt(e.target.value) || 0)}
-                    />
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-400">Choose Amount</label>
+                  <div className="mt-1 grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button type="button" className="bg-gray-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors">₹500</button>
+                    <button type="button" className="bg-gray-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors">₹1,000</button>
+                    <button type="button" className="bg-gray-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors">₹2,000</button>
+                    <button type="button" className="bg-gray-700 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition-colors">Custom</button>
                   </div>
                 </div>
-                
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-gray-700 p-3 rounded-lg flex items-center justify-center cursor-pointer border-2 border-teal-500">
-                      <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 5H3C1.89543 5 1 5.89543 1 7V17C1 18.1046 1.89543 19 3 19H21C22.1046 19 23 18.1046 23 17V7C23 5.89543 22.1046 5 21 5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M1 10H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="bg-gray-700 p-3 rounded-lg flex items-center justify-center cursor-pointer">
-                      <svg className="h-6 w-6 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M2 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="bg-gray-700 p-3 rounded-lg flex items-center justify-center cursor-pointer">
-                      <svg className="h-6 w-6 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 1V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-400">Full Name</label>
+                  <input type="text" id="name" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-lg p-3 text-white focus:ring-teal-500 focus:border-teal-500" placeholder="John Doe" />
                 </div>
-                
-                <button className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-8 py-4 rounded-lg font-semibold transition duration-300 flex items-center justify-center group">
-                  <span>Donate ₹{donationAmount || 0}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                
-                <p className="text-sm text-gray-400 text-center mt-4">Your donation is tax-deductible under Section 80G</p>
-              </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-400">Email Address</label>
+                  <input type="email" id="email" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-lg p-3 text-white focus:ring-teal-500 focus:border-teal-500" placeholder="johndoe@example.com" />
+                </div>
+                <button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mt-6">Donate Now</button>
+              </form>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Call to Action */}
-      <section className="max-w-6xl mx-auto py-20 px-4">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="relative">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-40 h-40 bg-teal-500 rounded-full filter blur-3xl"></div>
-              <div className="absolute bottom-0 right-0 w-40 h-40 bg-blue-500 rounded-full filter blur-3xl"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-purple-500 rounded-full filter blur-3xl"></div>
+      
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 text-center py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2">
+              <span className="text-xl font-bold text-teal-400">ResQ.AI</span>
             </div>
-            
-            <div className="relative z-10 py-16 px-8 text-center">
-              <span className="bg-gradient-to-r from-teal-500 to-blue-500 text-transparent bg-clip-text text-lg font-bold mb-4 inline-block">TAKE ACTION NOW</span>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                Join the ResQ.AI Platform <br className="hidden md:block" />
-                <span className="bg-gradient-to-r from-teal-400 via-blue-400 to-purple-400 text-transparent bg-clip-text">Save Lives Together</span>
-              </h2>
-              <p className="text-gray-300 mb-10 max-w-2xl mx-auto text-lg">
-                Whether you're a citizen in need, a rescue worker, or an administrator, ResQ.AI is here to help you navigate through emergencies effectively.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border-t-4 border-teal-500 hover:transform hover:scale-105 transition duration-300 group">
-                  <div className="bg-teal-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-500/30 transition duration-300">
-                    <svg className="h-8 w-8 text-teal-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Citizen</h3>
-                  <p className="text-gray-400 mb-4 text-sm">Request help, report incidents, and receive real-time updates during emergencies</p>
-                  <Link to="/citizen" className="inline-flex items-center justify-center w-full bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300 group-hover:shadow-lg">
-                    <span>Get Help Now</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                </div>
-                
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border-t-4 border-blue-500 hover:transform hover:scale-105 transition duration-300 group">
-                  <div className="bg-blue-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/30 transition duration-300">
-                    <svg className="h-8 w-8 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Rescue Worker</h3>
-                  <p className="text-gray-400 mb-4 text-sm">Coordinate rescue efforts, access victim information, and optimize resource allocation</p>
-                  <Link to="/rescue" className="inline-flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300 group-hover:shadow-lg">
-                    <span>Join Rescue Team</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                </div>
-                
-                <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border-t-4 border-purple-500 hover:transform hover:scale-105 transition duration-300 group">
-                  <div className="bg-purple-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition duration-300">
-                    <svg className="h-8 w-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Administrator</h3>
-                  <p className="text-gray-400 mb-4 text-sm">Manage resources, monitor operations, and make data-driven decisions during crises</p>
-                  <Link to="/admin" className="inline-flex items-center justify-center w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300 group-hover:shadow-lg">
-                    <span>Access Dashboard</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="mt-12 pt-8 border-t border-gray-800">
-                <p className="text-gray-400 mb-4">Already using ResQ.AI?</p>
-                <Link to="/login" className="text-teal-400 hover:text-teal-300 font-semibold transition duration-300 inline-flex items-center">
-                  <span>Log in to your account</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                  </svg>
-                </Link>
-              </div>
+            <p className="text-sm">&copy; 2025 ResQ.AI. All rights reserved.</p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
             </div>
           </div>
         </div>
-      </section>
-
-{/* Floating Chatbot Button */}
-<button
-  onClick={() => setOpenChat(!openChat)}
-  className="fixed bottom-6 right-6 z-50 bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-full shadow-2xl"
->
-  💬
-</button>
-
-{/* Chatbot Popup */}
-{openChat && (
-  <div className="fixed bottom-20 right-6 w-80 bg-gray-900 text-white rounded-xl shadow-2xl flex flex-col z-50">
-    <div className="bg-teal-600 p-3 rounded-t-xl font-semibold flex justify-between items-center">
-      <span>🤖 ResQ.AI Chatbot</span>
-      <button onClick={() => setOpenChat(false)} className="text-white">✖</button>
-    </div>
-    <div className="p-4 h-60 overflow-y-auto text-gray-200 text-sm">
-      <p>👋 Hi! I’m ResQ.AI Assistant. Ask me anything.</p>
-    </div>
-    <div className="p-3 border-t border-gray-700 flex">
-      <input
-        type="text"
-        placeholder="Type your message..."
-        className="flex-grow p-2 bg-gray-800 text-white rounded-l"
-      />
-      <button className="bg-teal-600 px-4 rounded-r">➡️</button>
-    </div>
-  </div>
-)}
-
+      </footer>
     </div>
   );
-}
+};
 
 export default Home;
