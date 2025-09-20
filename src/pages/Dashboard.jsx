@@ -7,7 +7,7 @@ import axios from "axios";
 import ReportModal from "../components/ReportModal";
 import RequestJoinTeam from "../components/RequestJoinTeam";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_URL = "https://resq-ai-server-2tme.onrender.com";
 
 export default function DisasterDashboard() {
   const [activeTab, setActiveTab] = useState("alerts");

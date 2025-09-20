@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
 const Badge = ({ children }) => (
   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">

@@ -33,7 +33,7 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
 const RescueDashboard = () => {
   const { currentUser, logout } = useAuth();

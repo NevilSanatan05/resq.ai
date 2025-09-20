@@ -8,7 +8,7 @@ import TeamCard from './TeamCard';
 import TeamForm from './TeamForm';
 import TeamDetailModal from './TeamDetailModal';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
 const TeamManagement = ({ userRole, showCreateButton = true, filterByUser = false }) => {
   const { currentUser } = useAuth();
