@@ -7,7 +7,7 @@
  import ReportModal from '../components/ReportModal';
 import { data } from 'react-router-dom';
 
- const API_URL = 'http://localhost:5000/api';
+ const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
  const StatusBadge = ({ status }) => {
    const map = {

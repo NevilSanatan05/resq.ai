@@ -6,7 +6,7 @@ import axios from 'axios';
 function Citizen() {
   const { sendSOS } = useContext(SOSContext);
   const { showToast } = useToast();
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");

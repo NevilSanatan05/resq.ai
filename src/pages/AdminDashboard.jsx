@@ -150,7 +150,7 @@ const sampleResponseTeams = [
   { id: 5, name: 'Team Epsilon', status: 'Deployed', location: 'Delhi', state: 'Delhi', region: 'Northern' },
 ];
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
 const AdminDashboard = () => {
   const { showToast } = useToast();

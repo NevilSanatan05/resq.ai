@@ -4,7 +4,7 @@ import axios from 'axios';
 export const SOSContext = createContext();
 
 export function SOSProvider({ children }) {
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
   // Load saved data from localStorage on init
   const [requests, setRequests] = useState(() => {
     const saved = localStorage.getItem("sos_requests");

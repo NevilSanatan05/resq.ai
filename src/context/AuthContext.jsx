@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://resq-ai-server-2tme.onrender.com/api';
 
 const AuthContext = createContext();
 
